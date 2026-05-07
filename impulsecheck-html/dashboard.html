@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – Dashboard</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .dash-card {
+      background: var(--card-inner);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .dash-card h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    .budget-row {
+      display: flex;
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 20px;
+    }
+    .budget-boxes { display: flex; gap: 12px; flex: 1; }
+    .budget-box {
+      background: var(--card);
+      border-radius: var(--radius-sm);
+      padding: 18px 22px;
+      flex: 1;
+      box-shadow: var(--shadow-sm);
+    }
+    .budget-box .b-label { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-bottom: 6px; }
+    .budget-box .b-amount { font-size: 30px; font-weight: 800; color: var(--text); }
+    .budget-box .b-amount.green { color: var(--green); }
+    .action-col { display: flex; flex-direction: column; gap: 8px; min-width: 190px; }
+    .action-col .btn { margin: 0; padding: 11px; font-size: 13px; }
+    .empty-state { padding: 40px 20px; text-align: center; }
+    .empty-icon {
+      width: 56px; height: 56px;
+      background: var(--green-light);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      color: var(--green);
+    }
+    .empty-state h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .empty-state p {
+      font-size: 13px; color: var(--text-muted); line-height: 1.5;
+      margin-bottom: 20px; max-width: 260px; margin-left: auto; margin-right: auto;
+    }
+    .empty-state .btn { max-width: 260px; margin: 0 auto; }
+    .act-header {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 16px;
+      padding: 13px 20px;
+      font-size: 13px; font-weight: 700; color: var(--text);
+      border-bottom: 1.5px solid var(--border);
+    }
+    @media (max-width: 640px) {
+      .budget-row   { flex-direction: column; }
+      .budget-boxes { flex-direction: row; }
+      .budget-box .b-amount { font-size: 22px; }
+      .action-col   { flex-direction: row; min-width: unset; }
+      .action-col .btn { flex: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <img src="assets/logo.png" alt="" style="height:56px;width:auto;object-fit:contain;display:block;" />
+    <div class="topbar-right">
+      <button class="home-btn" onclick="window.location.href='dashboard.html'" title="Dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      </button>
+      <a href="help.html" class="home-btn" title="Help & FAQ" style="text-decoration:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </a>
+      <a href="profile.html" class="avatar" id="topbar-avatar">M</a>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div class="dash-card">
+      <h2>Dashboard</h2>
+
+      <div class="budget-row">
+        <div class="budget-boxes">
+          <div class="budget-box">
+            <div class="b-label">Monthly Budget</div>
+            <div class="b-amount" id="budget-display"></div>
+          </div>
+          <div class="budget-box">
+            <div class="b-label">Remaining</div>
+            <div class="b-amount green" id="remaining-display"></div>
+          </div>
+        </div>
+        <div class="action-col">
+          <a href="record-purchase.html" class="btn btn-primary">Record Purchase</a>
+          <a href="set-budget.html" class="btn btn-outline" id="set-budget-btn">Set Budget</a>
+          <a href="spending-report.html" class="btn btn-outline">View Reports</a>
+        </div>
+      </div>
+
+      <div class="activity-table" id="activity-section"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="api.js"></script>
+  <script src="currency.js"></script>
+  <script>
+    const ACTIVITY  = JSON.parse(localStorage.getItem('ic_activity') || '[]');
+    const rawBudget = localStorage.getItem('ic_budget');
+    const BUDGET    = rawBudget ? parseFloat(rawBudget) : 0;
+    const spent     = ACTIVITY.reduce((s, a) => s + a.price, 0);
+    const remaining = Math.max(0, BUDGET - spent);
+
+    document.getElementById('budget-display').textContent    = fmt(BUDGET, true);
+    document.getElementById('remaining-display').textContent = fmt(remaining, true);
+
+    if (!rawBudget) {
+      const btn = document.getElementById('set-budget-btn');
+      btn.style.background  = 'var(--green)';
+      btn.style.color       = '#fff';
+      btn.style.borderColor = 'var(--green)';
+      btn.style.boxShadow   = '0 4px 14px rgba(46,170,126,0.30)';
+      btn.textContent       = '⚡ Set your budget';
+    }
+
+    function tagHTML(outcome) {
+      const map = {
+        WAIT:  '<span class="tag tag-wait">WAIT</span>',
+        AVOID: '<span class="tag tag-avoid">AVOID</span>',
+        BUY:   '<span class="tag tag-buy">BUY</span>',
+      };
+      return map[outcome] || '';
+    }
+
+    function renderActivity() {
+      const section = document.getElementById('activity-section');
+      if (ACTIVITY.length === 0) {
+        section.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <h3>No transactions yet</h3>
+            <p>Your purchase history will appear here once you start recording. Let's make smarter decisions together.</p>
+            <a href="record-purchase.html" class="btn btn-primary">Record your first purchase</a>
+          </div>`;
+        return;
+      }
+      const rows = [...ACTIVITY].reverse().map(a => `
+        <div class="activity-row three-col">
+          <span class="row-name">${a.name}</span>
+          <span class="row-price">${fmt(a.price)}</span>
+          <span class="row-outcome">${tagHTML(a.outcome)}</span>
+        </div>`).join('');
+      section.innerHTML = `
+        <div class="act-header"><span>Recent Activity</span><span></span><span></span></div>
+        ${rows}`;
+    }
+
+    renderActivity();
+
+    const msg = sessionStorage.getItem('toast_msg');
+    if (msg) { showToast(msg); sessionStorage.removeItem('toast_msg'); }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+  </script>
+  <script src="notifications.js"></script>
+  <script src="shared-avatar.js"></script>
+</body>
+</html>

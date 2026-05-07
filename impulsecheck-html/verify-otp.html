@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – Verify OTP</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .auth-page { min-height:100vh; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 16px; }
+    .auth-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:40px 44px 36px; width:100%; max-width:460px; text-align:center; }
+    .otp-icon { width:64px; height:64px; background:var(--green-light); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 20px; color:var(--green); }
+    .auth-card h2 { font-size:22px; font-weight:700; color:var(--text); margin-bottom:8px; }
+    .otp-sub { font-size:13px; color:var(--text-muted); margin-bottom:28px; line-height:1.5; }
+    .otp-sub strong { color:var(--text); }
+
+    /* OTP input boxes */
+    .otp-boxes { display:flex; gap:10px; justify-content:center; margin-bottom:24px; }
+    .otp-box {
+      width:52px; height:60px;
+      text-align:center; font-size:24px; font-weight:800;
+      background:var(--input-bg); border:2px solid var(--input-border);
+      border-radius:var(--radius-sm); color:var(--text); outline:none;
+      transition:border-color 0.2s, box-shadow 0.2s;
+    }
+    .otp-box:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(46,170,126,0.15); background:#fff; }
+    .otp-box.filled { border-color:var(--green); }
+    .otp-box.err    { border-color:var(--red); box-shadow:0 0 0 3px rgba(229,57,53,0.12); }
+
+    .resend-row { margin-top:16px; font-size:13px; color:var(--text-muted); }
+    .resend-btn { background:none; border:none; color:var(--green); font-weight:700; font-size:13px; cursor:pointer; font-family:'Nunito',sans-serif; }
+    .resend-btn:hover { text-decoration:underline; }
+    .resend-btn:disabled { color:var(--text-light); cursor:not-allowed; text-decoration:none; }
+    .timer { color:var(--green); font-weight:700; }
+
+    @media (max-width:480px) {
+      .auth-card { padding:28px 20px 24px; }
+      .otp-box { width:44px; height:52px; font-size:20px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <img src="assets/logo.png" alt="" style="height:80px;width:auto;object-fit:contain;display:block;margin-bottom:24px;" />
+
+    <div class="auth-card">
+      <div class="otp-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+      </div>
+      <h2>Check Your Email</h2>
+      <p class="otp-sub">We sent a 6-digit OTP to<br/><strong id="email-display">your email</strong>.<br/>It expires in 10 minutes.</p>
+
+      <div id="error-banner" class="error-banner" style="display:none;text-align:left"></div>
+
+      <div class="otp-boxes" id="otp-boxes">
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+        <input class="otp-box" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" />
+      </div>
+
+      <button class="btn btn-primary" onclick="verifyOTP()" style="margin-bottom:0">Verify Account</button>
+
+      <div class="resend-row">
+        Didn't get the code?
+        <button class="resend-btn" id="resend-btn" onclick="resendOTP()" disabled>
+          Resend in <span class="timer" id="timer">60s</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const userId = sessionStorage.getItem('otp_user_id');
+    const email  = sessionStorage.getItem('otp_email');
+
+    if (!userId) window.location.href = 'register.html';
+
+    document.getElementById('email-display').textContent = email || 'your email';
+
+    /* ── OTP box auto-advance ── */
+    const boxes = document.querySelectorAll('.otp-box');
+    boxes.forEach((box, i) => {
+      box.addEventListener('input', () => {
+        box.value = box.value.replace(/[^0-9]/g, '');
+        box.classList.toggle('filled', box.value.length > 0);
+        if (box.value && i < boxes.length - 1) boxes[i + 1].focus();
+        clearErrors();
+      });
+      box.addEventListener('keydown', e => {
+        if (e.key === 'Backspace' && !box.value && i > 0) boxes[i - 1].focus();
+      });
+      box.addEventListener('paste', e => {
+        const paste = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+        if (paste.length === 6) {
+          boxes.forEach((b, j) => { b.value = paste[j] || ''; b.classList.toggle('filled', !!b.value); });
+          boxes[5].focus();
+          e.preventDefault();
+        }
+      });
+    });
+
+    function getOTP() { return [...boxes].map(b => b.value).join(''); }
+
+    function clearErrors() {
+      boxes.forEach(b => b.classList.remove('err'));
+      document.getElementById('error-banner').style.display = 'none';
+    }
+
+    /* ── Verify OTP ── */
+    async function verifyOTP() {
+      const otp = getOTP();
+      if (otp.length < 6) { showError('Please enter all 6 digits.'); boxes.forEach(b => { if(!b.value) b.classList.add('err'); }); return; }
+
+      try {
+        const res  = await fetch('http://127.0.0.1:5000/api/auth/verify-otp', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ user_id: parseInt(userId), otp_code: otp }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showError(data.error);
+          boxes.forEach(b => b.classList.add('err'));
+          return;
+        }
+        localStorage.setItem('ic_token', data.token);
+        localStorage.setItem('ic_user',  JSON.stringify(data.user));
+        sessionStorage.removeItem('otp_user_id');
+        sessionStorage.removeItem('otp_email');
+        window.location.href = 'dashboard.html';
+      } catch {
+        showError('Cannot connect to server.');
+      }
+    }
+
+    /* ── Resend OTP ── */
+    async function resendOTP() {
+      try {
+        const res  = await fetch('http://127.0.0.1:5000/api/auth/resend-otp', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ user_id: parseInt(userId) }),
+        });
+        const data = await res.json();
+        if (!res.ok) { showError(data.error); return; }
+        startTimer();
+        clearErrors();
+        boxes.forEach(b => { b.value=''; b.classList.remove('filled'); });
+        boxes[0].focus();
+      } catch {
+        showError('Cannot connect to server.');
+      }
+    }
+
+    /* ── Countdown timer ── */
+    let countdown;
+    function startTimer(seconds = 60) {
+      const btn   = document.getElementById('resend-btn');
+      const timer = document.getElementById('timer');
+      btn.disabled = true;
+      let s = seconds;
+      clearInterval(countdown);
+      countdown = setInterval(() => {
+        s--;
+        timer.textContent = s + 's';
+        if (s <= 0) {
+          clearInterval(countdown);
+          btn.disabled  = false;
+          btn.innerHTML = 'Resend OTP';
+        }
+      }, 1000);
+    }
+    startTimer();
+
+    function showError(msg) {
+      const b = document.getElementById('error-banner');
+      b.textContent = msg; b.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

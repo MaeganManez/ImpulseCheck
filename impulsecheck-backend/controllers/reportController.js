@@ -1,0 +1,70 @@
+const db                  = require('../config/db');
+const { sendReportEmail } = require('../config/mailer');
+
+/* ════════════════════════════════════════
+   POST /api/report/send
+   Generate report and send to user's email
+   Body: { period: 'weekly' | 'monthly' }
+════════════════════════════════════════ */
+async function sendReport(req, res) {
+  try {
+    const userId = req.user.id;
+    const period = req.body.period || 'monthly'; // 'weekly' or 'monthly'
+
+    // ── Get user info ──
+    const [userRows] = await db.query(
+      'SELECT full_name, email, currency FROM users WHERE id = ?',
+      [userId]
+    );
+    if (userRows.length === 0) return res.status(404).json({ error: 'User not found.' });
+    const user = userRows[0];
+
+    // ── Date range ──
+    let dateFilter;
+    if (period === 'weekly') {
+      dateFilter = 'AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
+    } else {
+      dateFilter = 'AND MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())';
+    }
+
+    // ── Get purchases for period ──
+    const [purchases] = await db.query(
+      `SELECT item_name, price, category, user_decision, created_at
+       FROM purchases
+       WHERE user_id = ? ${dateFilter}
+       ORDER BY created_at DESC`,
+      [userId]
+    );
+
+    // ── Compute stats ──
+    const totalSpent      = purchases.reduce((s, p) => s + parseFloat(p.price), 0);
+    const impulsive       = purchases.filter(p => p.user_decision === 'AVOID' || p.user_decision === 'WAIT');
+    const impulsiveCount  = impulsive.length;
+    const impulsiveAmount = impulsive.reduce((s, p) => s + parseFloat(p.price), 0);
+    const savedAmount     = purchases
+      .filter(p => p.user_decision === 'AVOID')
+      .reduce((s, p) => s + parseFloat(p.price), 0);
+
+    const reportData = {
+      totalSpent,
+      impulsiveCount,
+      impulsiveAmount,
+      savedAmount,
+      purchases,
+      currency: user.currency,
+    };
+
+    // ── Send email ──
+    await sendReportEmail(user.email, user.full_name, reportData, period);
+
+    return res.status(200).json({
+      message: `${period.charAt(0).toUpperCase() + period.slice(1)} report sent to ${user.email}`,
+    });
+
+  } catch (err) {
+    console.error('SendReport error:', err);
+    return res.status(500).json({ error: 'Failed to send report. Please try again.' });
+  }
+}
+
+module.exports = { sendReport };

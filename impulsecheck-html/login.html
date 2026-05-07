@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – Log In</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .auth-page { min-height:100vh; background:var(--bg); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:32px 16px; }
+    .auth-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:40px 44px 36px; width:100%; max-width:500px; }
+    .field { margin-bottom:16px; }
+    .input-wrap { position:relative; display:flex; align-items:center; }
+    .input-wrap .ic { position:absolute; left:14px; color:#8fa3b1; display:flex; align-items:center; pointer-events:none; }
+    .input-wrap input {
+      width:100%; background:var(--input-bg); border:1.5px solid var(--input-border);
+      border-radius:var(--radius-sm); padding:13px 42px;
+      font-size:14px; font-family:'Nunito',sans-serif; color:var(--text); outline:none;
+      transition:border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-wrap input::placeholder { color:var(--text-light); }
+    .input-wrap input:focus { border-color:var(--green); box-shadow:0 0 0 3px rgba(46,170,126,0.12); background:#fff; }
+    .toggle-pw { position:absolute; right:12px; background:none; border:none; cursor:pointer; color:var(--text-light); padding:4px; display:flex; align-items:center; }
+    .toggle-pw:hover { color:var(--text-muted); }
+    .forgot-row { text-align:right; margin-top:-6px; margin-bottom:14px; }
+    .forgot-link { font-size:12px; color:var(--green); font-weight:600; }
+    .forgot-link:hover { text-decoration:underline; }
+    .divider-text { display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:13px; margin:20px 0 8px; }
+    .divider-text::before, .divider-text::after { content:''; flex:1; height:1px; background:var(--border); }
+    .signup-row { text-align:center; font-size:13px; color:var(--text-muted); }
+    .signup-row a { color:var(--blue-link); font-weight:700; }
+    @media (max-width:560px) { .auth-card { padding:28px 20px 24px; } }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <img src="assets/logo.png" alt="" style="height:90px;width:auto;object-fit:contain;display:block;margin-bottom:28px;" />
+
+    <div class="auth-card">
+      <div id="error-banner" class="error-banner" style="display:none"></div>
+
+      <div class="field">
+        <div class="input-wrap">
+          <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span>
+          <input type="email" id="email" placeholder="Email" autocomplete="email" onkeydown="if(event.key==='Enter')handleLogin()" />
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="input-wrap">
+          <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input type="password" id="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')handleLogin()" />
+          <button class="toggle-pw" type="button" onclick="togglePw()" tabindex="-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="forgot-row">
+        <a href="forgot-password.html" class="forgot-link">Forgot password?</a>
+      </div>
+
+      <button class="btn btn-primary" onclick="handleLogin()">Log In</button>
+
+      <div class="divider-text">Don't have an account?</div>
+      <div class="signup-row"><a href="register.html">Sign Up</a></div>
+    </div>
+  </div>
+
+  <script>
+    async function handleLogin() {
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) { showError('Please fill in all fields.'); return; }
+
+      try {
+        const res  = await fetch('http://127.0.0.1:5000/api/auth/login', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          // If unverified, redirect to OTP page
+          if (data.needs_verification) {
+            sessionStorage.setItem('otp_user_id', data.user_id);
+            sessionStorage.setItem('otp_email',   email);
+            window.location.href = 'verify-otp.html';
+            return;
+          }
+          showError(data.error); return;
+        }
+
+        localStorage.setItem('ic_token', data.token);
+        localStorage.setItem('ic_user',  JSON.stringify(data.user));
+        localStorage.setItem('ic_currency', data.user.currency || 'PHP');
+        window.location.href = 'dashboard.html';
+
+      } catch (err) {
+        showError('Cannot connect to server. Make sure the backend is running.');
+      }
+    }
+
+    function togglePw() {
+      const inp = document.getElementById('password');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    function showError(msg) {
+      const b = document.getElementById('error-banner');
+      b.textContent = msg; b.style.display = 'block';
+    }
+  </script>
+</body>
+</html>

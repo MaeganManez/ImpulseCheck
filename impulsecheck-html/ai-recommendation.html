@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – AI Recommendation</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .ai-loading-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 48px 40px 44px;
+      max-width: 620px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .ai-loading-card h2 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .ai-loading-card p  { font-size: 14px; color: var(--text-muted); margin-bottom: 36px; line-height: 1.5; }
+    .ai-steps { text-align: left; max-width: 320px; margin: 0 auto; }
+
+    /* ── RESULT CARD ── */
+    .ai-result-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      max-width: 680px;
+      margin: 0 auto;
+      display: none;
+    }
+
+    /* Color bar at top */
+    .ai-result-banner {
+      padding: 20px 28px 18px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .ai-banner-icon {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 22px;
+    }
+    .ai-banner-text h2 {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      margin: 0 0 3px;
+    }
+    .ai-banner-text p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.85);
+      margin: 0;
+    }
+
+    .ai-result-body { padding: 26px 28px 24px; }
+
+    /* Item row */
+    .ai-item-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--input-bg);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+    .ai-item-emoji { font-size: 24px; }
+    .ai-item-info strong { font-size: 16px; font-weight: 800; color: var(--text); display: block; }
+    .ai-item-info span   { font-size: 13px; color: var(--text-muted); }
+
+    /* Sections */
+    .ai-section { margin-bottom: 20px; }
+    .ai-section-label {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    /* Reasons */
+    .ai-reasons { display: flex; flex-direction: column; gap: 8px; }
+    .ai-reason {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .check-circle {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+      color: #fff;
+    }
+
+    /* Advice box */
+    .ai-advice-box {
+      background: var(--input-bg);
+      border-left: 3px solid var(--green);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* Alternative box */
+    .ai-alt-box {
+      background: var(--input-bg);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.6;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .ai-alt-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .ai-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+    /* Decision buttons */
+    .decision-row { display: flex; gap: 10px; }
+    .decision-row .btn { flex: 1; margin: 0; padding: 13px; font-size: 13px; }
+
+    /* Fallback badge */
+    .fallback-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fff3e0;
+      color: #e68a00;
+      border: 1px solid #f0c060;
+      border-radius: 20px;
+      padding: 4px 10px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .ai-loading-card { padding: 36px 20px 32px; }
+      .ai-result-body  { padding: 20px 16px 20px; }
+      .decision-row    { flex-direction: column; }
+      .ai-banner-text h2 { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <img src="assets/logo.png" alt="" style="height:56px;width:auto;object-fit:contain;display:block;" />
+    <div class="topbar-right">
+      <button class="home-btn" onclick="window.location.href='dashboard.html'" title="Dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      </button>
+      <a href="help.html" class="home-btn" title="Help & FAQ" style="text-decoration:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </a>
+      <a href="profile.html" class="avatar" id="topbar-avatar">M</a>
+    </div>
+  </header>
+
+  <div class="main-content">
+
+    <!-- LOADING CARD -->
+    <div class="ai-loading-card" id="loading-card">
+      <div class="spinner"></div>
+      <h2>Analyzing your purchase...</h2>
+      <p>Our AI is reviewing your input and financial context.<br/>This usually takes just a moment.</p>
+      <div class="ai-steps" id="steps-container">
+        <div class="ai-step text-done" id="step-1">
+          <div class="ai-step-icon done">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
+          </div>
+          Purchase details received
+        </div>
+        <div class="ai-step text-done" id="step-2">
+          <div class="ai-step-icon done">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
+          </div>
+          Emotion context analyzed
+        </div>
+        <div class="ai-step text-active" id="step-3">
+          <div class="ai-step-icon active">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="4"/></svg>
+          </div>
+          Checking budget status...
+        </div>
+        <div class="ai-step" id="step-4">
+          <div class="ai-step-icon pending"></div>
+          Generating recommendation
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULT CARD -->
+    <div class="ai-result-card" id="result-card">
+      <div class="ai-result-banner" id="result-banner">
+        <div class="ai-banner-icon" id="banner-icon"></div>
+        <div class="ai-banner-text">
+          <h2 id="banner-title"></h2>
+          <p id="banner-subtitle"></p>
+        </div>
+      </div>
+
+      <div class="ai-result-body">
+        <div id="fallback-notice" style="display:none;">
+          <div class="fallback-badge">⚡ Quick analysis — AI unavailable</div>
+        </div>
+
+        <!-- Item summary -->
+        <div class="ai-item-row">
+          <div class="ai-item-emoji" id="item-emoji">🛍️</div>
+          <div class="ai-item-info">
+            <strong id="item-name-display"></strong>
+            <span id="item-meta"></span>
+          </div>
+        </div>
+
+        <!-- Reasons -->
+        <div class="ai-section">
+          <div class="ai-section-label">Why this recommendation</div>
+          <div class="ai-reasons" id="result-reasons"></div>
+        </div>
+
+        <hr class="ai-divider" />
+
+        <!-- AI Advice -->
+        <div class="ai-section">
+          <div class="ai-section-label">💬 AI Advice</div>
+          <div class="ai-advice-box" id="result-advice"></div>
+        </div>
+
+        <!-- Better Alternative -->
+        <div class="ai-section">
+          <div class="ai-section-label">💡 Better Alternative</div>
+          <div class="ai-alt-box">
+            <div class="ai-alt-icon">→</div>
+            <div id="result-alternative"></div>
+          </div>
+        </div>
+
+        <hr class="ai-divider" />
+
+        <!-- Decision buttons -->
+        <div class="decision-row">
+          <button class="btn btn-buy"   onclick="decide('BUY')">✅ Save as Buy</button>
+          <button class="btn btn-delay" onclick="decide('WAIT')">⏳ Save as Delayed</button>
+          <button class="btn btn-avoid" onclick="decide('AVOID')">🚫 Save as Avoided</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="api.js"></script>
+  <script src="currency.js"></script>
+  <script>
+    const pending = JSON.parse(sessionStorage.getItem('ic_pending') || 'null');
+    if (!pending) { window.location.href = 'dashboard.html'; }
+
+    /* ── Color + icon maps ── */
+    const colorMap = { AVOID: '#e53935', WAIT: '#f0a830', BUY: '#2eaa7e' };
+    const bgMap    = { AVOID: '#fdecea', WAIT: '#fff8ee', BUY:  '#e6f5f0' };
+    const iconMap  = {
+      AVOID: '🚫',
+      WAIT:  '⏳',
+      BUY:   '✅',
+    };
+    const categoryEmoji = {
+      food: '🍔', clothing: '👗', electronics: '📱', health: '💊',
+      entertainment: '🎮', transport: '🚗', education: '📚',
+      beauty: '💄', sports: '⚽', home: '🏠', others: '🛍️',
+    };
+
+    /* ── Loading animation helpers ── */
+    function checkSVG() {
+      return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>`;
+    }
+    function dotSVG() {
+      return `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="4"/></svg>`;
+    }
+    function markStepDone(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.querySelector('.ai-step-icon').className = 'ai-step-icon done';
+      el.querySelector('.ai-step-icon').innerHTML = checkSVG();
+      el.className = 'ai-step text-done';
+    }
+    function markStepActive(id, label) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.querySelector('.ai-step-icon').className = 'ai-step-icon active';
+      el.querySelector('.ai-step-icon').innerHTML = dotSVG();
+      el.className = 'ai-step text-active';
+      if (label) el.lastChild.textContent = ' ' + label;
+    }
+
+    /* ── Call backend AI ── */
+    async function getAIRecommendation() {
+      const data = await AI.analyze(
+        pending.name,
+        pending.price,
+        pending.category,
+        pending.reason,
+        pending.emotion
+      );
+      return data.recommendation;
+    }
+
+    /* ── Render result ── */
+    function showResult(rec, isFallback) {
+      const color = colorMap[rec.tag];
+      const emoji = categoryEmoji[(pending.category || '').toLowerCase()] || '🛍️';
+
+      // Banner
+      document.getElementById('result-banner').style.background = color;
+      document.getElementById('banner-icon').textContent = iconMap[rec.tag];
+      document.getElementById('banner-title').textContent = rec.title;
+      document.getElementById('banner-subtitle').textContent = rec.subtitle;
+
+      // Item info
+      document.getElementById('item-emoji').textContent = emoji;
+      document.getElementById('item-name-display').textContent = pending.name;
+      document.getElementById('item-meta').textContent =
+        `${fmt(parseFloat(pending.price), true)} · ${pending.category || 'General'} · Feeling: ${pending.emotion || 'Not specified'}`;
+
+      // Fallback notice
+      if (isFallback) {
+        document.getElementById('fallback-notice').style.display = 'block';
+      }
+
+      // Reasons
+      document.getElementById('result-reasons').innerHTML = rec.reasons.map(r => `
+        <div class="ai-reason">
+          <div class="check-circle" style="background:${color};">
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
+          </div>
+          ${r}
+        </div>`).join('');
+
+      // Advice
+      document.getElementById('result-advice').textContent =
+        rec.advice || 'Consider your budget and financial goals before making this purchase.';
+
+      // Alternative
+      document.getElementById('result-alternative').textContent =
+        rec.alternative || 'Take 24 hours to think it over before deciding.';
+
+      // Show card
+      document.getElementById('loading-card').style.display = 'none';
+      document.getElementById('result-card').style.display  = 'block';
+      sessionStorage.setItem('ic_rec_tag', rec.tag);
+    }
+
+    /* ── Main ── */
+    async function run() {
+      let isFallback = false;
+
+      const apiPromise = getAIRecommendation().catch(err => {
+        console.error('AI error:', err);
+        isFallback = true;
+        return getFallbackRecommendation();
+      });
+
+      setTimeout(() => {
+        markStepDone('step-3');
+        markStepActive('step-4', 'Generating recommendation...');
+      }, 1400);
+
+      const [rec] = await Promise.all([
+        apiPromise,
+        new Promise(resolve => setTimeout(resolve, 2600))
+      ]);
+
+      markStepDone('step-4');
+      setTimeout(() => showResult(rec, isFallback), 400);
+    }
+
+    run();
+
+    /* ── Fallback ── */
+    function getFallbackRecommendation() {
+      if (pending.emotion === 'stressed' || pending.emotion === 'sad' || pending.emotion === 'bored') {
+        return {
+          tag: 'WAIT', title: 'THINK IT OVER FIRST',
+          subtitle: 'Your current emotional state may be influencing this decision.',
+          reasons: ['Emotional spending often leads to regret', 'Consider waiting 24 hours', 'Ask: need or want?'],
+          advice: 'When we feel stressed or sad, shopping can feel like a quick fix — but the feeling fades and the expense stays. Give yourself a day before deciding.',
+          alternative: 'Write down why you want it. If you still feel the same tomorrow, reconsider then.',
+        };
+      }
+      if (pending.reason === 'impulse') {
+        return {
+          tag: 'AVOID', title: 'AVOID THIS ONE',
+          subtitle: 'This purchase shows signs of impulsive buying.',
+          reasons: ['Unplanned purchase', 'May already own something similar', 'Does not align with intentional spending'],
+          advice: 'Impulse purchases feel exciting in the moment but often end up unused. Ask yourself when you will actually use this.',
+          alternative: 'Add it to a wishlist and revisit in 2 weeks. If it still matters, save up for it intentionally.',
+        };
+      }
+      return {
+        tag: 'BUY', title: 'LOOKS GOOD TO BUY',
+        subtitle: 'This appears to be a reasonable and intentional purchase.',
+        reasons: ['No major red flags', 'Seems intentional', 'Within reasonable spending behavior'],
+        advice: 'This purchase seems well thought out. Just make sure it fits within your monthly budget.',
+        alternative: 'Check if there is a discount or better deal available before purchasing.',
+      };
+    }
+
+    /* ── Save decision ── */
+    async function decide(outcome) {
+      try {
+        await Purchases.save({
+          item_name:     pending.name,
+          price:         parseFloat(pending.price),
+          category:      pending.category || 'Others',
+          reason:        pending.reason   || '',
+          emotion:       pending.emotion  || '',
+          user_decision: outcome,
+          ai_tag:        sessionStorage.getItem('ic_rec_tag') || outcome,
+        });
+      } catch (err) {
+        console.error('Save purchase error:', err.message);
+      }
+
+      sessionStorage.removeItem('ic_pending');
+
+      const msgs = {
+        BUY:   '✅ Purchase saved as Buy!',
+        WAIT:  '⏳ Saved as Delayed — good thinking!',
+        AVOID: '🚫 Great choice — purchase avoided!',
+      };
+      sessionStorage.setItem('toast_msg', msgs[outcome]);
+
+      if (typeof addLocalNotification === 'function') {
+        const titles = { BUY: '🛒 Purchase Recorded', WAIT: '⏳ Purchase Delayed', AVOID: '🚫 Purchase Avoided' };
+        const notifMsgs = {
+          BUY:   `You bought ${pending.name} for ${fmt(parseFloat(pending.price), true)}.`,
+          WAIT:  `You delayed buying ${pending.name}. Revisit when you are sure.`,
+          AVOID: `You avoided spending ${fmt(parseFloat(pending.price), true)} on ${pending.name}. Great decision!`,
+        };
+        addLocalNotification(titles[outcome], notifMsgs[outcome], outcome.toLowerCase());
+      }
+
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+  <script src="notifications.js"></script>
+</body>
+</html>

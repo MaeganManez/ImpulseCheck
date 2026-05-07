@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – Set Budget</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .page-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 32px 32px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .page-card-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      padding-bottom: 16px;
+      border-bottom: 1.5px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .amount-input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .amount-input-wrap .sym {
+      position: absolute;
+      left: 14px;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--green);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .amount-input-wrap input {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1.5px solid var(--input-border);
+      border-radius: var(--radius-sm);
+      padding: 13px 14px 13px 32px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .amount-input-wrap input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(46,170,126,0.12);
+      background: #fff;
+    }
+    .field-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+    .section-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .field .category-grid { margin-bottom: 8px; }
+    .cat-error {
+      color: var(--red);
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .btn-row .btn { flex: 1; }
+    @media (max-width: 640px) {
+      .page-card { padding: 20px 16px 24px; }
+      .btn-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <button class="home-btn" onclick="window.location.href='dashboard.html'" title="Dashboard">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    </button>
+    <div class="topbar-right">
+      <a href="help.html" class="home-btn" title="Help & FAQ" style="text-decoration:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </a>
+      <a href="profile.html" class="avatar" id="topbar-avatar">M</a>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div class="page-card">
+      <div class="page-card-title">Set Budget</div>
+
+      <div class="field">
+        <label>Budget Amount</label>
+        <div class="amount-input-wrap">
+          <span class="sym" id="currency-sym">₱</span>
+          <input type="number" id="budget-input" placeholder="Budget Amount...." min="1" step="0.01" />
+        </div>
+        <div class="field-hint">This is the total amount you plan to spend this month.</div>
+      </div>
+
+      <div class="field">
+        <label>Budget period</label>
+        <select id="period-select">
+          <option value="monthly" selected>Monthly (Default)</option>
+          <option value="weekly">Weekly</option>
+          <option value="biweekly">Bi-Weekly</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Spending Categories</label>
+        <div class="category-grid" id="cat-grid">
+          <!-- NO 'checked' class by default — all start unselected -->
+          <div class="cat-chip" data-cat="Food">
+            <span class="cat-dot" style="background:#2eaa7e"></span>Food
+          </div>
+          <div class="cat-chip" data-cat="Transport">
+            <span class="cat-dot" style="background:#f0a830"></span>Transport
+          </div>
+          <div class="cat-chip" data-cat="Shopping">
+            <span class="cat-dot" style="background:#3b82f6"></span>Shopping
+          </div>
+          <div class="cat-chip" data-cat="Entertainment">
+            <span class="cat-dot" style="background:#8b5cf6"></span>Entertainment
+          </div>
+          <div class="cat-chip" data-cat="Health">
+            <span class="cat-dot" style="background:#e53935"></span>Health
+          </div>
+          <div class="cat-chip" data-cat="Bills">
+            <span class="cat-dot" style="background:#718096"></span>Bills
+          </div>
+        </div>
+        <div class="cat-error" id="cat-error" style="display:none;">
+          ⚠ Please select at least one category.
+        </div>
+        <div class="field-hint">Select the categories you want to track this month.</div>
+      </div>
+
+      <div class="budget-preview">
+        <div class="budget-preview-title">Budget preview</div>
+        <div class="budget-preview-row">
+          <span>Total budget</span>
+          <span id="preview-amount"></span>
+        </div>
+        <div class="budget-bar-track">
+          <div class="budget-bar-fill" id="preview-bar" style="width:0%"></div>
+        </div>
+        <div class="budget-preview-sub" id="preview-sub"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="saveBudget()">Save budget</button>
+        <button class="btn btn-outline" onclick="window.location.href='dashboard.html'">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="api.js"></script>
+  <script src="currency.js"></script>
+  <script>
+    const input = document.getElementById('budget-input');
+
+    /* ── Load user info ── */
+    const user = getUser();
+    if (user) {
+      const ta = document.getElementById('topbar-avatar');
+      if (ta) ta.textContent = (user.full_name || 'U').charAt(0).toUpperCase();
+    }
+
+    /* ── Currency symbol ── */
+    document.getElementById('currency-sym').textContent = getCurrencySymbol();
+
+    /* ── Selected categories — start EMPTY, only restore if user previously saved ── */
+    let selectedCategories = [];
+
+    /* Only restore saved categories if budget was already saved before */
+    const hasSavedBudget = localStorage.getItem('ic_budget');
+    if (hasSavedBudget) {
+      selectedCategories = JSON.parse(localStorage.getItem('ic_categories') || '[]');
+    }
+
+    /* ── Render chips ── */
+    function renderChips() {
+      document.querySelectorAll('.cat-chip').forEach(chip => {
+        chip.classList.toggle('checked', selectedCategories.includes(chip.dataset.cat));
+      });
+    }
+    renderChips();
+
+    /* ── Click handler ── */
+    document.querySelectorAll('.cat-chip').forEach(chip => {
+      chip.addEventListener('click', function () {
+        const cat = this.dataset.cat;
+        const idx = selectedCategories.indexOf(cat);
+        if (idx === -1) {
+          selectedCategories.push(cat);
+        } else {
+          selectedCategories.splice(idx, 1);
+        }
+        this.classList.toggle('checked', selectedCategories.includes(cat));
+        if (selectedCategories.length > 0) {
+          document.getElementById('cat-error').style.display = 'none';
+        }
+      });
+    });
+
+    /* ── Load saved budget amount ── */
+    const savedBudget = parseFloat(localStorage.getItem('ic_budget') || '0');
+    input.value = savedBudget || '';
+    updatePreview();
+    input.addEventListener('input', updatePreview);
+
+    /* ── Restore saved period ── */
+    const savedPeriod = localStorage.getItem('ic_period') || 'monthly';
+    document.getElementById('period-select').value = savedPeriod;
+
+    /* ── Budget preview ── */
+    function updatePreview() {
+      const val       = parseFloat(input.value) || 0;
+      const activity  = JSON.parse(localStorage.getItem('ic_activity') || '[]');
+      const spent     = activity.reduce((s, a) => s + a.price, 0);
+      const remaining = Math.max(0, val - spent);
+      const pct       = val > 0 ? Math.min(100, Math.round((spent / val) * 100)) : 0;
+
+      document.getElementById('preview-amount').textContent = fmtDec(val, 2);
+      document.getElementById('preview-bar').style.width    = pct + '%';
+      document.getElementById('preview-sub').textContent    =
+        fmtDec(spent, 1) + ' spent · ' + fmtDec(remaining, 2) + ' remaining';
+    }
+
+    /* ── Save ── */
+    async function saveBudget() {
+      const val = parseFloat(input.value);
+
+      if (!val || val <= 0) {
+        alert('Please enter a valid budget amount.');
+        return;
+      }
+
+      if (selectedCategories.length === 0) {
+        document.getElementById('cat-error').style.display = 'block';
+        document.getElementById('cat-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      try {
+        await Budget.save(val, document.getElementById('period-select').value, selectedCategories);
+      } catch (err) {
+        console.error('Budget save error:', err.message);
+      }
+
+      localStorage.setItem('ic_budget',     val);
+      localStorage.setItem('ic_categories', JSON.stringify(selectedCategories));
+      localStorage.setItem('ic_period',     document.getElementById('period-select').value);
+
+      sessionStorage.setItem('toast_msg', '✅ Budget set to ' + fmt(val, true));
+      if (typeof addLocalNotification === 'function') {
+        addLocalNotification('💰 Budget Updated', 'Your monthly budget has been set to ' + fmt(val, true) + '.', 'budget');
+      }
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+  <script src="notifications.js"></script>
+</body>
+</html>

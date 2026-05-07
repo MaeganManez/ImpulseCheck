@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – Help & FAQ</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .help-card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:0; overflow:hidden; max-width:720px; margin:0 auto; }
+    .help-header { background:var(--green); padding:28px 32px; }
+    .help-header h2 { font-size:22px; font-weight:800; color:#fff; margin-bottom:4px; }
+    .help-header p  { font-size:13px; color:rgba(255,255,255,0.8); }
+
+    /* Search */
+    .help-search { padding:20px 28px; border-bottom:1.5px solid var(--border); }
+    .search-wrap { position:relative; display:flex; align-items:center; }
+    .search-wrap .ic { position:absolute; left:14px; color:#8fa3b1; pointer-events:none; }
+    .search-wrap input {
+      width:100%; background:var(--input-bg); border:1.5px solid var(--input-border);
+      border-radius:var(--radius-sm); padding:12px 14px 12px 42px;
+      font-size:14px; font-family:'Nunito',sans-serif; color:var(--text); outline:none;
+      transition:border-color 0.2s;
+    }
+    .search-wrap input:focus { border-color:var(--green); background:#fff; }
+
+    /* FAQ sections */
+    .faq-body { padding:24px 28px 32px; }
+    .faq-section { margin-bottom:28px; }
+    .faq-section-title { font-size:14px; font-weight:800; color:var(--green); letter-spacing:0.5px; text-transform:uppercase; margin-bottom:12px; }
+
+    .faq-item { border:1.5px solid var(--border); border-radius:var(--radius-sm); margin-bottom:8px; overflow:hidden; }
+    .faq-q {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 18px; font-size:14px; font-weight:600; color:var(--text);
+      cursor:pointer; transition:background 0.15s; gap:12px;
+    }
+    .faq-q:hover { background:var(--card-inner); }
+    .faq-q.open  { background:var(--green-light); color:var(--green-dark); }
+    .faq-chevron { flex-shrink:0; transition:transform 0.2s; color:var(--text-muted); }
+    .faq-q.open .faq-chevron { transform:rotate(180deg); color:var(--green); }
+    .faq-a {
+      max-height:0; overflow:hidden; transition:max-height 0.3s ease, padding 0.3s ease;
+      font-size:13px; color:var(--text-muted); line-height:1.7; padding:0 18px;
+    }
+    .faq-a.open { max-height:400px; padding:0 18px 14px; }
+    .faq-a a { color:var(--green); font-weight:600; }
+
+    /* Contact card */
+    .contact-card { background:var(--card-inner); border-radius:var(--radius-sm); padding:20px; text-align:center; margin-top:4px; }
+    .contact-card h4 { font-size:15px; font-weight:700; color:var(--text); margin-bottom:6px; }
+    .contact-card p  { font-size:13px; color:var(--text-muted); margin-bottom:14px; }
+    .contact-card a  { color:#fff; background:var(--green); padding:10px 24px; border-radius:20px; font-size:13px; font-weight:700; display:inline-block; }
+    .contact-card a:hover { background:var(--green-dark); }
+
+    @media (max-width:600px) { .help-header, .help-search, .faq-body { padding-left:16px; padding-right:16px; } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <button class="home-btn" onclick="window.location.href='dashboard.html'" title="Dashboard">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    </button>
+    <div class="topbar-right">
+      <a href="profile.html" class="avatar" id="topbar-avatar">M</a>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div class="help-card">
+      <div class="help-header">
+        <h2>❓ Help & FAQ</h2>
+        <p>Find answers to common questions about ImpulseCheck</p>
+      </div>
+
+      <div class="help-search">
+        <div class="search-wrap">
+          <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <input type="text" placeholder="Search for a question..." id="search-input" oninput="filterFAQ()" />
+        </div>
+      </div>
+
+      <div class="faq-body">
+
+        <!-- GETTING STARTED -->
+        <div class="faq-section">
+          <div class="faq-section-title">🚀 Getting Started</div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              What is ImpulseCheck?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">ImpulseCheck is an AI-powered spending intervention system. Before you make a purchase, the app analyzes it and gives you a recommendation — Buy, Wait, or Avoid — based on your budget, emotional state, and spending history.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              How do I create an account?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Click "Sign Up" on the login page. Fill in your full name, username, email, and a strong password. You'll receive a 6-digit OTP on your email — enter it to verify your account and you're in.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              Why do I need to verify my email with OTP?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Email verification ensures your account is secure and that only you can access it. It also allows us to send you spending reports and important notifications to the right address.</div>
+          </div>
+        </div>
+
+        <!-- BUDGET -->
+        <div class="faq-section">
+          <div class="faq-section-title">💰 Budget</div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              How do I set my monthly budget?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">From the Dashboard, click "Set Budget". Enter your budget amount, choose a budget period (monthly is default), and select the spending categories you want to track. The live preview shows your budget vs. spent in real time.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              Can I change my budget mid-month?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Yes. Click "Set Budget" from the Dashboard at any time and save a new amount. The updated budget takes effect immediately and the remaining balance recalculates.</div>
+          </div>
+        </div>
+
+        <!-- AI RECOMMENDATION -->
+        <div class="faq-section">
+          <div class="faq-section-title">🤖 AI Recommendation</div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              How does the AI decide BUY, WAIT, or AVOID?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">The AI analyzes: the item name and price, your remaining budget, your reason for buying, your current emotion, and your recent purchase history. It then gives a recommendation with specific reasons tailored to your situation.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              What if I disagree with the AI recommendation?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">The decision is always yours. You can choose "Save as Buy" even if the AI says AVOID. ImpulseCheck is a guide, not a restriction. The goal is to make you think before you spend — not to block you from spending.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              Why is the emotion field important?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Research shows that a large percentage of impulse purchases are emotion-driven — stress, boredom, sadness, and peer pressure are major triggers. By capturing your emotional state, the AI can factor this into the recommendation and help prevent emotionally-driven overspending.</div>
+          </div>
+        </div>
+
+        <!-- REPORTS -->
+        <div class="faq-section">
+          <div class="faq-section-title">📊 Reports</div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              How do I get a spending report sent to my email?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Go to the Spending Report page and click "Send Report to Email". Choose Weekly or Monthly. The report will be sent to your registered email with a full summary of your purchases, impulsive spending, and money saved.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              How is "Saved by AI Intervention" calculated?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">It's the total amount of purchases you chose to "Save as Avoided" — meaning the AI flagged them and you agreed not to buy. This metric directly shows the financial impact the app had on your spending behavior.</div>
+          </div>
+        </div>
+
+        <!-- ACCOUNT -->
+        <div class="faq-section">
+          <div class="faq-section-title">👤 Account & Security</div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              What are the password requirements?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Your password must be at least 8 characters long and include: 1 uppercase letter (A–Z), 1 lowercase letter (a–z), 1 number (0–9), and 1 special character (!@#$%^&amp;*). A strength meter on the register page guides you.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              I forgot my password. What do I do?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Click "Forgot password?" on the login page. Enter your registered email — you'll receive an OTP. Enter the OTP, then set your new password. The whole process takes about 2 minutes.</div>
+          </div>
+
+          <div class="faq-item">
+            <div class="faq-q" onclick="toggle(this)">
+              How do I change my display currency?
+              <svg class="faq-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+            <div class="faq-a">Go to Profile → Preferences → Display Currency. Choose from 20 supported currencies. Click "Save changes" and all amounts across the entire app update immediately.</div>
+          </div>
+        </div>
+
+        <!-- CONTACT -->
+        <div class="contact-card">
+          <h4>Still have questions?</h4>
+          <p>Our support team is happy to help you with anything not covered here.</p>
+          <a href="mailto:support@impulsecheck.app">📧 Contact Support</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggle(el) {
+      const answer = el.nextElementSibling;
+      const isOpen = el.classList.contains('open');
+      // Close all
+      document.querySelectorAll('.faq-q').forEach(q => q.classList.remove('open'));
+      document.querySelectorAll('.faq-a').forEach(a => a.classList.remove('open'));
+      // Open clicked (if it was closed)
+      if (!isOpen) { el.classList.add('open'); answer.classList.add('open'); }
+    }
+
+    function filterFAQ() {
+      const q = document.getElementById('search-input').value.toLowerCase();
+      document.querySelectorAll('.faq-item').forEach(item => {
+        const text = item.textContent.toLowerCase();
+        item.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    // Load avatar
+    const user = JSON.parse(localStorage.getItem('ic_user') || 'null');
+    if (user) {
+      const a = document.getElementById('topbar-avatar');
+      a.textContent = user.full_name?.[0]?.toUpperCase() || 'M';
+      const photo = localStorage.getItem('ic_profile_photo');
+      if (photo) {
+        a.textContent = '';
+        const img = document.createElement('img');
+        img.src = photo;
+        img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
+        a.appendChild(img);
+      }
+    }
+  </script>
+  <script src="notifications.js"></script>
+</body>
+</html>

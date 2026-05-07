@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – Spending Report</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .report-wrap {
+      background: var(--card-inner);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      padding: 20px 20px 0;
+    }
+    .stat-box {
+      background: var(--card);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px 16px;
+      box-shadow: var(--shadow-sm);
+    }
+    .stat-box .s-label { font-size: 12px; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
+    .stat-box .s-value { font-size: 26px; font-weight: 800; color: var(--text); line-height: 1; }
+    .stat-box .s-value.green { color: var(--green); }
+    .stat-box .s-sub { font-size: 12px; color: var(--tag-avoid-fg); font-weight: 600; margin-top: 4px; }
+    .summary-section { padding: 20px 20px 24px; }
+    .summary-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .summary-title { font-size: 16px; font-weight: 700; color: var(--text); }
+    .btn-send-report {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 14px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      border: 1.5px solid var(--green);
+      background: var(--green-light); color: var(--green);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-send-report:hover { background: var(--green); color: #fff; }
+    .btn-clear-all {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 14px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      border: 1.5px solid #fca5a5;
+      background: transparent; color: var(--red);
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-clear-all:hover { background: #fdecea; }
+    .report-table-wrap {
+      background: var(--card);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .report-table-header {
+      display: grid;
+      grid-template-columns: 1fr auto auto 36px;
+      gap: 12px;
+      padding: 12px 20px;
+      font-size: 13px; font-weight: 700; color: var(--text);
+      border-bottom: 1.5px solid var(--border);
+    }
+    .report-table-header span:nth-child(2) { text-align: right; }
+    .report-table-header span:nth-child(3) { text-align: right; min-width: 86px; }
+    .report-row {
+      display: grid;
+      grid-template-columns: 1fr auto auto 36px;
+      gap: 12px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      transition: background 0.15s;
+    }
+    .report-row:last-child { border-bottom: none; }
+    .report-row:hover { background: #fafcfb; }
+    .r-name    { font-size: 14px; font-weight: 600; color: var(--text); display: flex; flex-direction: column; gap: 2px; }
+    .r-cat     { font-size: 11px; font-weight: 600; color: var(--text-light); }
+    .r-price   { font-size: 14px; color: var(--text-muted); font-weight: 600; text-align: right; white-space: nowrap; }
+    .r-outcome { text-align: right; min-width: 86px; }
+    .btn-delete {
+      display: flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 8px;
+      border: none; background: transparent; color: var(--text-light);
+      cursor: pointer; transition: background 0.15s, color 0.15s; flex-shrink: 0;
+    }
+    .btn-delete:hover { background: #fdecea; color: var(--red); }
+    .report-row.removing {
+      animation: rowFadeOut 0.28s ease forwards;
+    }
+    @keyframes rowFadeOut {
+      from { opacity: 1; transform: translateX(0); max-height: 60px; }
+      to   { opacity: 0; transform: translateX(12px); max-height: 0; padding: 0 20px; }
+    }
+    .report-empty {
+      padding: 36px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .del-modal-backdrop {
+      position: fixed; inset: 0;
+      background: rgba(15,23,35,0.55);
+      backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+      z-index: 1000; display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .del-modal-backdrop.open { opacity: 1; pointer-events: all; }
+    .del-modal {
+      background: #fff; border-radius: 16px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+      width: 100%; max-width: 380px;
+      padding: 28px 28px 24px; text-align: center;
+      transform: scale(0.95) translateY(10px); transition: transform 0.2s;
+    }
+    .del-modal-backdrop.open .del-modal { transform: scale(1) translateY(0); }
+    .del-modal-icon {
+      width: 56px; height: 56px; background: #fdecea; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px; color: var(--red);
+    }
+    .del-modal h3 { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .del-modal p  { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 22px; }
+    .del-modal-item {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--input-bg); border-radius: var(--radius-xs);
+      padding: 8px 16px; font-size: 13px; font-weight: 700; color: var(--text);
+      margin-bottom: 22px;
+    }
+    .del-modal-btns { display: flex; gap: 10px; }
+    .del-modal-btns .btn { flex: 1; margin: 0; padding: 12px; font-size: 14px; }
+    .period-btn {
+      flex: 1; padding: 10px; border-radius: var(--radius-sm);
+      font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif;
+      border: 1.5px solid var(--border); background: var(--input-bg);
+      color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .period-btn.active { border-color: var(--green); background: var(--green-light); color: var(--green); }
+    .period-btn:hover:not(.active) { border-color: var(--green); color: var(--green); }
+    @media (max-width: 640px) {
+      .stat-grid { grid-template-columns: 1fr 1fr; padding: 14px 14px 0; }
+      .stat-grid .stat-box:last-child { grid-column: 1 / -1; }
+      .stat-box .s-value { font-size: 20px; }
+      .summary-section { padding: 14px 14px 20px; }
+      .report-table-header, .report-row { padding: 12px 14px; gap: 8px; }
+      .del-modal { padding: 24px 18px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <img src="assets/logo.png" alt="" style="height:56px;width:auto;object-fit:contain;display:block;" />
+    <div class="topbar-right">
+      <button class="home-btn" onclick="window.location.href='dashboard.html'" title="Dashboard">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+      </button>
+      <a href="help.html" class="home-btn" title="Help & FAQ" style="text-decoration:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </a>
+      <a href="profile.html" class="avatar" id="topbar-avatar">M</a>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div class="report-wrap">
+      <div class="stat-grid">
+        <div class="stat-box">
+          <div class="s-label" id="stat-period-label">Total Purchase</div>
+          <div class="s-value" id="stat-total"></div>
+        </div>
+        <div class="stat-box">
+          <div class="s-label">Impulsive Purchases</div>
+          <div class="s-value green" id="stat-impulsive">0</div>
+          <div class="s-sub" id="stat-impulsive-amt"></div>
+        </div>
+        <div class="stat-box">
+          <div class="s-label">Saved by AI Intervention</div>
+          <div class="s-value green" id="stat-saved"></div>
+        </div>
+      </div>
+
+      <div class="summary-section">
+        <div class="summary-title-row">
+          <div class="summary-title">Purchase Summary</div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button class="btn-send-report" onclick="openSendReport()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+              Email Report
+            </button>
+            <button class="btn-clear-all" id="clear-all-btn" onclick="confirmClearAll()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+              Clear all
+            </button>
+          </div>
+        </div>
+        <div id="report-table"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DELETE MODAL -->
+  <div class="del-modal-backdrop" id="del-backdrop" onclick="closeModal(event)">
+    <div class="del-modal">
+      <div class="del-modal-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      </div>
+      <h3 id="modal-title">Delete transaction?</h3>
+      <p id="modal-desc">This action cannot be undone.</p>
+      <div class="del-modal-item" id="modal-item-label"></div>
+      <div class="del-modal-btns">
+        <button class="btn btn-outline" onclick="closeDel()">Cancel</button>
+        <button class="btn btn-avoid" onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEND REPORT MODAL -->
+  <div class="del-modal-backdrop" id="report-modal" onclick="if(event.target.id==='report-modal')closeReportModal()" style="display:none">
+    <div class="del-modal">
+      <div class="del-modal-icon" style="background:var(--green-light);color:var(--green)">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg>
+      </div>
+      <h3>Email Spending Report</h3>
+      <p>Choose a period and we'll send a full summary to your registered email address.</p>
+      <div style="display:flex;gap:10px;margin-bottom:22px;">
+        <button id="period-weekly"  class="period-btn"        onclick="selectPeriod('weekly')">📅 Weekly</button>
+        <button id="period-monthly" class="period-btn active" onclick="selectPeriod('monthly')">📆 Monthly</button>
+      </div>
+      <div class="del-modal-btns">
+        <button class="btn btn-outline" onclick="closeReportModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="sendReport()" style="margin:0">Send Report</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="currency.js"></script>
+  <script>
+    function loadActivity() { return JSON.parse(localStorage.getItem('ic_activity') || '[]'); }
+    function saveActivity(data) { localStorage.setItem('ic_activity', JSON.stringify(data)); }
+
+    let pendingDeleteId = null;
+    let pendingClearAll = false;
+
+    function render() {
+      const activity = loadActivity();
+      const now = new Date();
+      const monthName = now.toLocaleString('default', { month: 'long' });
+      document.getElementById('stat-period-label').textContent = `Total Purchase (${monthName})`;
+
+      const total     = activity.reduce((s, a) => s + a.price, 0);
+      const impulsive = activity.filter(a => a.outcome === 'AVOID' || a.outcome === 'WAIT');
+      const impAmt    = impulsive.reduce((s, a) => s + a.price, 0);
+      const avoided   = activity.filter(a => a.outcome === 'AVOID').reduce((s, a) => s + a.price, 0);
+
+      document.getElementById('stat-total').textContent         = fmt(total, true);
+      document.getElementById('stat-impulsive').textContent     = impulsive.length;
+      document.getElementById('stat-impulsive-amt').textContent = impAmt > 0 ? '(' + fmt(impAmt, true) + ')' : '';
+      document.getElementById('stat-saved').textContent         = fmt(avoided, true);
+      document.getElementById('clear-all-btn').style.display    = activity.length > 0 ? 'flex' : 'none';
+
+      const tableEl = document.getElementById('report-table');
+      if (activity.length === 0) {
+        tableEl.innerHTML = `<div class="report-table-wrap"><div class="report-empty">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#a0aec0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom:10px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <div>No transactions recorded yet.</div></div></div>`;
+        return;
+      }
+
+      const rows = [...activity].reverse().map(a => `
+        <div class="report-row" id="row-${a.id}">
+          <span class="r-name">${escHTML(a.name)}<span class="r-cat">${escHTML(a.category || '')}</span></span>
+          <span class="r-price">${fmt(a.price)}</span>
+          <span class="r-outcome">${outcomeHTML(a.outcome, a.price)}</span>
+          <button class="btn-delete" onclick="askDelete(${a.id}, '${escHTML(a.name)}', ${a.price})">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
+        </div>`).join('');
+
+      tableEl.innerHTML = `<div class="report-table-wrap">
+        <div class="report-table-header"><span>Recent Activity</span><span>Price</span><span>Outcome</span><span></span></div>
+        ${rows}</div>`;
+    }
+
+    function outcomeHTML(outcome, price) {
+      if (outcome === 'WAIT')  return `<span class="tag tag-wait">WAIT</span>`;
+      if (outcome === 'AVOID') return `<span class="tag tag-avoid">AVOID</span>`;
+      if (outcome === 'BUY')   return `<span class="tag-saved">Saved ${fmt(price, true)}</span>`;
+      return '';
+    }
+
+    function escHTML(str) {
+      return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function askDelete(id, name, price) {
+      pendingDeleteId = id; pendingClearAll = false;
+      document.getElementById('modal-title').textContent = 'Delete transaction?';
+      document.getElementById('modal-desc').textContent  = 'This action cannot be undone.';
+      document.getElementById('modal-item-label').innerHTML =
+        `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+         ${escHTML(name)} — ${fmt(price, true)}`;
+      openDel();
+    }
+
+    function confirmDelete() {
+      if (pendingClearAll) {
+        saveActivity([]); closeDel(); render(); showToast('🗑️ All transactions cleared.'); return;
+      }
+      const row = document.getElementById('row-' + pendingDeleteId);
+      if (row) {
+        row.classList.add('removing');
+        row.addEventListener('animationend', () => {
+          saveActivity(loadActivity().filter(a => a.id !== pendingDeleteId));
+          render(); showToast('🗑️ Transaction deleted.');
+        }, { once: true });
+      } else {
+        saveActivity(loadActivity().filter(a => a.id !== pendingDeleteId));
+        render(); showToast('🗑️ Transaction deleted.');
+      }
+      closeDel();
+    }
+
+    function confirmClearAll() {
+      const count = loadActivity().length;
+      pendingClearAll = true; pendingDeleteId = null;
+      document.getElementById('modal-title').textContent = 'Clear all transactions?';
+      document.getElementById('modal-desc').textContent  = `You are about to permanently delete all ${count} transaction${count !== 1 ? 's' : ''}.`;
+      document.getElementById('modal-item-label').innerHTML =
+        `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#718096" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+         ${count} transaction${count !== 1 ? 's' : ''} will be removed`;
+      openDel();
+    }
+
+    function openDel()  { document.getElementById('del-backdrop').classList.add('open'); }
+    function closeDel() { document.getElementById('del-backdrop').classList.remove('open'); }
+    function closeModal(e) { if (e.target.id === 'del-backdrop') closeDel(); }
+
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    let selectedPeriod = 'monthly';
+    function openSendReport() {
+      const m = document.getElementById('report-modal');
+      m.style.display = 'flex'; setTimeout(() => m.classList.add('open'), 10);
+    }
+    function closeReportModal() {
+      const m = document.getElementById('report-modal');
+      m.classList.remove('open'); setTimeout(() => m.style.display = 'none', 250);
+    }
+    function selectPeriod(p) {
+      selectedPeriod = p;
+      document.getElementById('period-weekly').classList.toggle('active', p === 'weekly');
+      document.getElementById('period-monthly').classList.toggle('active', p === 'monthly');
+    }
+    async function sendReport() {
+      const token = localStorage.getItem('ic_token');
+      if (!token) { showToast('⚠️ Please log in first.'); closeReportModal(); return; }
+      try {
+        const res  = await fetch('http://127.0.0.1:5000/api/report/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify({ period: selectedPeriod })
+        });
+        const data = await res.json();
+        closeReportModal();
+        showToast(res.ok ? '✅ ' + data.message : '❌ ' + data.error);
+      } catch { closeReportModal(); showToast('❌ Cannot connect to server.'); }
+    }
+
+    render();
+  </script>
+  <script src="notifications.js"></script>
+  <script src="shared-avatar.js"></script>
+</body>
+</html>

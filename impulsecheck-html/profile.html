@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – Profile</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .profile-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 36px 32px 32px;
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    .avatar-zone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+    .avatar-ring {
+      position: relative;
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      cursor: pointer;
+      margin-bottom: 12px;
+    }
+    .avatar-ring::before {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green), #1a6b8a);
+      z-index: 0;
+    }
+    .avatar-inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 3px solid #fff;
+    }
+    #avatar-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display: none !important;
+    }
+    #avatar-img.has-photo { display: block !important; }
+    .avatar-initials {
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      user-select: none;
+      position: relative;
+      z-index: 1;
+    }
+    .avatar-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 2;
+      gap: 4px;
+    }
+    .avatar-ring:hover .avatar-overlay { opacity: 1; }
+    .avatar-overlay svg   { color: #fff; }
+    .avatar-overlay span  { font-size: 11px; font-weight: 700; color: #fff; }
+    .avatar-actions { display: flex; gap: 8px; }
+    .avatar-action-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 6px 14px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer; border: 1.5px solid var(--border);
+      background: var(--input-bg); color: var(--text-muted);
+      transition: all 0.15s;
+    }
+    .avatar-action-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+    .avatar-action-btn.remove { color: var(--red); border-color: #fca5a5; }
+    .avatar-action-btn.remove:hover { background: #fdecea; border-color: var(--red); }
+    #remove-photo-btn { display: none; }
+    .field { margin-bottom: 14px; }
+    .field label { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px; }
+    .plain-input {
+      width: 100%; background: var(--input-bg);
+      border: 1.5px solid var(--input-border); border-radius: var(--radius-sm);
+      padding: 13px 14px; font-size: 14px; color: var(--text);
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .plain-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,170,126,0.12); background: #fff; }
+    .pref-section-label {
+      font-size: 15px; font-weight: 700; color: var(--text);
+      margin: 22px 0 10px; padding-top: 16px;
+      border-top: 1.5px solid var(--border);
+    }
+    .currency-pref-wrap { padding: 16px 0; border-bottom: 1px solid var(--border); }
+    .currency-pref-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 12px; }
+    .currency-label { font-size: 14px; font-weight: 600; color: var(--text); }
+    .currency-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .currency-selected-badge {
+      background: var(--green-light); color: var(--green-dark);
+      border: 1.5px solid var(--green-mid); border-radius: 20px;
+      padding: 4px 12px; font-size: 12px; font-weight: 800;
+      white-space: nowrap; flex-shrink: 0; transition: all 0.2s;
+    }
+    .currency-select {
+      width: 100%; background: var(--input-bg);
+      border: 1.5px solid var(--input-border); border-radius: var(--radius-sm);
+      padding: 12px 36px 12px 14px; font-size: 14px;
+      font-family: 'Nunito', sans-serif; color: var(--text);
+      outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .currency-select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,170,126,0.12); background-color: #fff; }
+    .profile-btns { display: flex; gap: 12px; margin-top: 24px; }
+    .profile-btns .btn { flex: 1; padding: 13px; }
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,35,0.6);
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+      z-index: 1000; display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #fff; border-radius: 20px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+      width: 100%; max-width: 500px; overflow: hidden;
+      transform: translateY(20px) scale(0.97); transition: transform 0.25s;
+    }
+    .modal-backdrop.open .modal { transform: translateY(0) scale(1); }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 16px; border-bottom: 1.5px solid var(--border);
+    }
+    .modal-header h3 { font-size: 17px; font-weight: 800; color: var(--text); }
+    .modal-close {
+      background: var(--input-bg); border: none; width: 32px; height: 32px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-muted); transition: background 0.15s, color 0.15s;
+    }
+    .modal-close:hover { background: #e2e8f0; color: var(--text); }
+    .step { display: none; }
+    .step.active { display: block; }
+    .dropzone {
+      margin: 20px 24px 4px; border: 2.5px dashed var(--input-border);
+      border-radius: var(--radius); padding: 36px 20px; text-align: center;
+      cursor: pointer; transition: border-color 0.2s, background 0.2s; background: var(--input-bg);
+    }
+    .dropzone:hover, .dropzone.dragover { border-color: var(--green); background: var(--green-light); }
+    .dropzone-icon {
+      width: 56px; height: 56px; background: var(--green-light); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 14px; color: var(--green);
+    }
+    .dropzone h4 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .dropzone p  { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 18px; }
+    .dropzone-btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 9px 22px;
+      background: var(--green); color: #fff; border-radius: 20px;
+      font-size: 13px; font-weight: 700; font-family: 'Nunito', sans-serif;
+      border: none; cursor: pointer; box-shadow: 0 3px 10px rgba(46,170,126,0.3);
+      transition: background 0.15s;
+    }
+    .dropzone-btn:hover { background: var(--green-dark); }
+    .format-badges { display: flex; justify-content: center; gap: 6px; margin: 12px 24px 20px; }
+    .format-badge {
+      padding: 4px 10px; background: var(--input-bg); border: 1.5px solid var(--border);
+      border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--text-muted);
+    }
+    .crop-area {
+      position: relative; margin: 16px 24px 12px; background: #1a1a2e;
+      border-radius: var(--radius-sm); overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+      min-height: 260px; user-select: none;
+    }
+    #crop-source { max-width: 100%; max-height: 270px; display: block; pointer-events: none; }
+    .crop-circle-frame {
+      position: absolute; border: 2.5px solid rgba(255,255,255,0.9); border-radius: 50%;
+      box-shadow: 0 0 0 9999px rgba(0,0,0,0.52), 0 0 0 1.5px rgba(255,255,255,0.15) inset;
+      cursor: move; box-sizing: border-box;
+    }
+    .crop-circle-frame::after {
+      content: ''; position: absolute; inset: 0; border-radius: 50%;
+      background:
+        linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px) center / 100% 33.33%,
+        linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px) center / 33.33% 100%;
+    }
+    .crop-handle {
+      position: absolute; width: 13px; height: 13px; background: #fff;
+      border-radius: 50%; border: 2px solid var(--green);
+      box-shadow: 0 1px 5px rgba(0,0,0,0.35); z-index: 2;
+    }
+    .crop-handle.tl { top:-6px; left:-6px; cursor: nwse-resize; }
+    .crop-handle.tr { top:-6px; right:-6px; cursor: nesw-resize; }
+    .crop-handle.bl { bottom:-6px; left:-6px; cursor: nesw-resize; }
+    .crop-handle.br { bottom:-6px; right:-6px; cursor: nwse-resize; }
+    .crop-controls { display: flex; align-items: center; gap: 10px; padding: 0 24px 6px; }
+    .ctrl-label {
+      font-size: 11px; font-weight: 700; color: var(--text-muted);
+      display: flex; align-items: center; gap: 4px; white-space: nowrap;
+    }
+    .crop-slider {
+      flex: 1; -webkit-appearance: none; appearance: none;
+      height: 4px; background: var(--border); border-radius: 99px; outline: none;
+    }
+    .crop-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+      background: var(--green); cursor: pointer;
+      box-shadow: 0 1px 6px rgba(46,170,126,0.4); border: 2px solid #fff;
+    }
+    .ctrl-btns { display: flex; gap: 6px; }
+    .ctrl-btn {
+      display: flex; align-items: center; gap: 3px; padding: 6px 10px;
+      border-radius: 8px; font-size: 11px; font-weight: 700;
+      font-family: 'Nunito', sans-serif; border: 1.5px solid var(--border);
+      background: var(--input-bg); color: var(--text-muted); cursor: pointer; transition: all 0.15s;
+    }
+    .ctrl-btn:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
+    .preview-strip {
+      display: flex; align-items: center; gap: 14px; margin: 0 24px 14px;
+      padding: 12px 16px; background: var(--input-bg); border-radius: var(--radius-sm);
+    }
+    .prev-circle { border-radius: 50%; overflow: hidden; background: var(--green); flex-shrink: 0; border: 2px solid var(--border); }
+    .prev-circle canvas { display: block; }
+    .prev-info { font-size: 12px; color: var(--text-muted); font-weight: 600; }
+    .prev-info strong { color: var(--text); display: block; font-size: 13px; margin-bottom: 1px; }
+    .modal-footer { display: flex; gap: 10px; padding: 14px 24px 20px; border-top: 1.5px solid var(--border); }
+    .modal-footer .btn { margin: 0; padding: 12px; flex: 1; font-size: 14px; }
+    #photo-input { display: none; }
+    @media (max-width: 600px) {
+      .profile-card { padding: 24px 16px 24px; }
+      .profile-btns { flex-direction: column; }
+      .modal { border-radius: 16px; }
+      .crop-controls { flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <button class="home-btn" onclick="window.location.href='dashboard.html'" title="Dashboard">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+    </button>
+    <div class="topbar-right">
+      <a href="help.html" class="home-btn" title="Help & FAQ" style="text-decoration:none;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </a>
+      <a href="profile.html" class="avatar" id="topbar-avatar">M</a>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <div class="profile-card">
+      <div class="avatar-zone">
+        <div class="avatar-ring" onclick="openModal()" title="Change photo">
+          <div class="avatar-inner" id="avatar-inner">
+            <img id="avatar-img" alt="Profile photo" />
+            <span class="avatar-initials" id="avatar-initials">M</span>
+          </div>
+          <div class="avatar-overlay">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span>Edit photo</span>
+          </div>
+        </div>
+        <div class="avatar-actions">
+          <button class="avatar-action-btn" onclick="openModal()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Change photo
+          </button>
+          <button class="avatar-action-btn remove" id="remove-photo-btn" onclick="removePhoto()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            Remove
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Full name</label>
+        <input class="plain-input" type="text" id="profile-name" placeholder="Your full name" />
+      </div>
+      <div class="field">
+        <label>Email address</label>
+        <input class="plain-input" type="email" id="profile-email" placeholder="Your email address" />
+      </div>
+
+      <div class="pref-section-label">Preferences</div>
+
+      <div class="currency-pref-wrap">
+        <div class="currency-pref-top">
+          <div>
+            <div class="currency-label">Display Currency</div>
+            <div class="currency-desc">Choose the currency for all amounts in the app</div>
+          </div>
+          <div class="currency-selected-badge" id="currency-badge">₱ PHP</div>
+        </div>
+        <select class="currency-select" id="pref-currency" onchange="updateCurrencyBadge()">
+          <option value="PHP" data-symbol="₱" selected>🇵🇭 Philippine Peso (₱ PHP)</option>
+          <option value="USD" data-symbol="$">🇺🇸 US Dollar ($ USD)</option>
+          <option value="EUR" data-symbol="€">🇪🇺 Euro (€ EUR)</option>
+          <option value="GBP" data-symbol="£">🇬🇧 British Pound (£ GBP)</option>
+          <option value="JPY" data-symbol="¥">🇯🇵 Japanese Yen (¥ JPY)</option>
+          <option value="KRW" data-symbol="₩">🇰🇷 Korean Won (₩ KRW)</option>
+          <option value="CNY" data-symbol="¥">🇨🇳 Chinese Yuan (¥ CNY)</option>
+          <option value="SGD" data-symbol="S$">🇸🇬 Singapore Dollar (S$ SGD)</option>
+          <option value="AUD" data-symbol="A$">🇦🇺 Australian Dollar (A$ AUD)</option>
+          <option value="CAD" data-symbol="C$">🇨🇦 Canadian Dollar (C$ CAD)</option>
+          <option value="INR" data-symbol="₹">🇮🇳 Indian Rupee (₹ INR)</option>
+          <option value="MYR" data-symbol="RM">🇲🇾 Malaysian Ringgit (RM MYR)</option>
+          <option value="IDR" data-symbol="Rp">🇮🇩 Indonesian Rupiah (Rp IDR)</option>
+          <option value="THB" data-symbol="฿">🇹🇭 Thai Baht (฿ THB)</option>
+          <option value="VND" data-symbol="₫">🇻🇳 Vietnamese Dong (₫ VND)</option>
+          <option value="AED" data-symbol="د.إ">🇦🇪 UAE Dirham (د.إ AED)</option>
+          <option value="SAR" data-symbol="﷼">🇸🇦 Saudi Riyal (﷼ SAR)</option>
+          <option value="BRL" data-symbol="R$">🇧🇷 Brazilian Real (R$ BRL)</option>
+          <option value="MXN" data-symbol="$">🇲🇽 Mexican Peso ($ MXN)</option>
+          <option value="ZAR" data-symbol="R">🇿🇦 South African Rand (R ZAR)</option>
+        </select>
+      </div>
+
+      <div class="toggle-wrap">
+        <div class="toggle-info">
+          <div class="toggle-label">Pre-select default emotion</div>
+          <div class="toggle-desc">Auto-fill emotion field when recording a purchase</div>
+        </div>
+        <label class="toggle"><input type="checkbox" id="pref-emotion" checked /><span class="toggle-slider"></span></label>
+      </div>
+
+      <div class="profile-btns">
+        <button class="btn btn-primary" onclick="saveProfile()">Save changes</button>
+        <button class="btn btn-outline-red" onclick="logout()">Log out</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modal-backdrop" onclick="backdropClick(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modal-title">Upload Profile Photo</h3>
+        <button class="modal-close" onclick="closeModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="step active" id="step-upload">
+        <div class="dropzone" id="dropzone" onclick="triggerFileInput()" ondragover="onDragOver(event)" ondragleave="onDragLeave(event)" ondrop="onDrop(event)">
+          <div class="dropzone-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          </div>
+          <h4>Drop your photo here</h4>
+          <p>Drag & drop an image file, or click<br/>the button below to browse your device</p>
+          <button class="dropzone-btn" onclick="event.stopPropagation(); triggerFileInput()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Browse files
+          </button>
+        </div>
+        <div class="format-badges">
+          <span class="format-badge">JPG</span><span class="format-badge">PNG</span>
+          <span class="format-badge">WEBP</span><span class="format-badge">GIF</span>
+          <span class="format-badge">Max 5 MB</span>
+        </div>
+      </div>
+      <div class="step" id="step-crop">
+        <div class="crop-area" id="crop-area">
+          <img id="crop-source" src="" alt="" draggable="false" />
+        </div>
+        <div class="crop-controls">
+          <span class="ctrl-label">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+            Zoom
+          </span>
+          <input type="range" class="crop-slider" id="zoom-slider" min="50" max="200" value="100" oninput="applyZoom(this.value)" />
+          <div class="ctrl-btns">
+            <button class="ctrl-btn" onclick="rotateImg(-90)">↺</button>
+            <button class="ctrl-btn" onclick="rotateImg(90)">↻</button>
+            <button class="ctrl-btn" onclick="flipImg()">⇄</button>
+            <button class="ctrl-btn" onclick="resetAll()">↺ Reset</button>
+          </div>
+        </div>
+        <div class="preview-strip">
+          <div class="prev-circle" style="width:52px;height:52px;"><canvas id="prev-lg" width="52" height="52"></canvas></div>
+          <div class="prev-circle" style="width:32px;height:32px;"><canvas id="prev-sm" width="32" height="32"></canvas></div>
+          <div class="prev-info"><strong>Live preview</strong>Profile · Topbar avatar</div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline" onclick="backToUpload()">← Change photo</button>
+          <button class="btn btn-primary" onclick="applyCrop()">Apply photo</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="photo-input" accept="image/*" onchange="onFilePicked(event)" />
+  <div class="toast" id="toast"></div>
+
+  <script src="api.js"></script>
+  <script>
+    let zoom = 100, rot = 0, flipped = false;
+    let cX = 0, cY = 0, cR = 80;
+    let dragging = false, resizing = false;
+    let dSX, dSY, dCX, dCY;
+
+    function updateCurrencyBadge() {
+      const sel = document.getElementById('pref-currency');
+      const opt = sel.options[sel.selectedIndex];
+      document.getElementById('currency-badge').textContent = opt.dataset.symbol + ' ' + opt.value;
+    }
+
+    function showAvatar(dataURL) {
+      const img      = document.getElementById('avatar-img');
+      const initials = document.getElementById('avatar-initials');
+      const inner    = document.getElementById('avatar-inner');
+      if (dataURL && dataURL.startsWith('data:image/') && dataURL.length > 100) {
+        img.src = dataURL;
+        img.classList.add('has-photo');
+        initials.style.display = 'none';
+        if (inner) inner.style.background = 'transparent';
+        document.getElementById('remove-photo-btn').style.display = 'flex';
+      } else {
+        img.classList.remove('has-photo');
+        img.removeAttribute('src');
+        initials.style.display = 'block';
+        if (inner) inner.style.background = '';
+        document.getElementById('remove-photo-btn').style.display = 'none';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      /* Force img hidden */
+      const img = document.getElementById('avatar-img');
+      img.classList.remove('has-photo');
+      img.removeAttribute('src');
+
+      /* Load real user data from login */
+      const user = getUser();
+      if (user) {
+        document.getElementById('profile-name').value  = user.full_name || '';
+        document.getElementById('profile-email').value = user.email || '';
+        const initial = (user.full_name || 'U').charAt(0).toUpperCase();
+        document.getElementById('avatar-initials').textContent = initial;
+        document.getElementById('topbar-avatar').textContent   = initial;
+      }
+
+      /* Load saved photo */
+      const savedPhoto = localStorage.getItem('ic_profile_photo');
+      if (savedPhoto && savedPhoto.startsWith('data:image/') && savedPhoto.length > 100) {
+        const testImg = new Image();
+        testImg.onload  = () => showAvatar(savedPhoto);
+        testImg.onerror = () => { localStorage.removeItem('ic_profile_photo'); showAvatar(null); };
+        testImg.src = savedPhoto;
+      } else {
+        if (savedPhoto) localStorage.removeItem('ic_profile_photo');
+        showAvatar(null);
+      }
+
+      /* Restore currency */
+      const savedCurrency = localStorage.getItem('ic_currency') || 'PHP';
+      const sel = document.getElementById('pref-currency');
+      for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === savedCurrency) { sel.selectedIndex = i; break; }
+      }
+      updateCurrencyBadge();
+    });
+
+    function openModal()  { document.getElementById('modal-backdrop').classList.add('open'); showStep('upload'); }
+    function closeModal() { document.getElementById('modal-backdrop').classList.remove('open'); }
+    function backdropClick(e) { if (e.target.id === 'modal-backdrop') closeModal(); }
+    function showStep(name) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step-' + name).classList.add('active');
+      document.getElementById('modal-title').textContent = name === 'upload' ? 'Upload Profile Photo' : 'Edit & Crop Photo';
+    }
+    function backToUpload() { document.getElementById('photo-input').value = ''; showStep('upload'); }
+    function triggerFileInput() { document.getElementById('photo-input').click(); }
+    function onFilePicked(e) { const f = e.target.files[0]; if (f) loadFile(f); }
+    function onDragOver(e)  { e.preventDefault(); document.getElementById('dropzone').classList.add('dragover'); }
+    function onDragLeave()  { document.getElementById('dropzone').classList.remove('dragover'); }
+    function onDrop(e) {
+      e.preventDefault();
+      document.getElementById('dropzone').classList.remove('dragover');
+      const f = e.dataTransfer.files[0];
+      if (f && f.type.startsWith('image/')) loadFile(f);
+    }
+    function loadFile(file) {
+      if (file.size > 5 * 1024 * 1024) { showToast('❌ File too large — max 5 MB'); return; }
+      const reader = new FileReader();
+      reader.onload = ev => {
+        zoom = 100; rot = 0; flipped = false;
+        document.getElementById('zoom-slider').value = 100;
+        const img = document.getElementById('crop-source');
+        img.onload = () => { initCrop(); showStep('crop'); refreshPreviews(); };
+        img.src = ev.target.result;
+        applyTransform();
+      };
+      reader.readAsDataURL(file);
+    }
+    function applyTransform() {
+      const img = document.getElementById('crop-source');
+      const s = zoom / 100;
+      img.style.transform = `scale(${s}) rotate(${rot}deg) scaleX(${flipped ? -1 : 1})`;
+      img.style.transformOrigin = 'center center';
+    }
+    function applyZoom(v)   { zoom = parseInt(v); applyTransform(); refreshPreviews(); }
+    function rotateImg(deg) { rot = (rot + deg + 360) % 360; applyTransform(); refreshPreviews(); }
+    function flipImg()      { flipped = !flipped; applyTransform(); refreshPreviews(); }
+    function resetAll() {
+      zoom = 100; rot = 0; flipped = false;
+      document.getElementById('zoom-slider').value = 100;
+      applyTransform(); initCrop(); refreshPreviews();
+    }
+    function initCrop() {
+      const area = document.getElementById('crop-area');
+      const W = area.clientWidth, H = area.clientHeight;
+      cR = Math.round(Math.min(W, H) * 0.38);
+      cX = Math.round(W / 2); cY = Math.round(H / 2);
+      buildFrame(area);
+    }
+    function buildFrame(area) {
+      const old = area.querySelector('.crop-circle-frame');
+      if (old) old.remove();
+      const frame = document.createElement('div');
+      frame.className = 'crop-circle-frame';
+      positionFrame(frame);
+      area.appendChild(frame);
+      ['tl','tr','bl','br'].forEach(p => {
+        const h = document.createElement('div');
+        h.className = 'crop-handle ' + p; h.dataset.h = p;
+        frame.appendChild(h);
+      });
+      bindEvents(frame, area);
+    }
+    function positionFrame(frame) {
+      const d = cR * 2;
+      Object.assign(frame.style, { width: d+'px', height: d+'px', left: (cX-cR)+'px', top: (cY-cR)+'px' });
+    }
+    function bindEvents(frame, area) {
+      frame.addEventListener('mousedown', e => {
+        if (e.target.dataset.h) return;
+        dragging = true; dSX = e.clientX; dSY = e.clientY; dCX = cX; dCY = cY;
+        e.preventDefault();
+      });
+      frame.querySelectorAll('.crop-handle').forEach(h => {
+        h.addEventListener('mousedown', e => {
+          resizing = true; dSX = e.clientX; dSY = e.clientY;
+          e.preventDefault(); e.stopPropagation();
+        });
+      });
+      document.addEventListener('mousemove', onPointerMove);
+      document.addEventListener('mouseup', () => { dragging = false; resizing = false; });
+    }
+    function onPointerMove(e) {
+      if (!dragging && !resizing) return;
+      const area = document.getElementById('crop-area');
+      const W = area.clientWidth, H = area.clientHeight;
+      const dx = e.clientX - dSX, dy = e.clientY - dSY;
+      if (dragging) {
+        cX = Math.max(cR, Math.min(W - cR, dCX + dx));
+        cY = Math.max(cR, Math.min(H - cR, dCY + dy));
+      }
+      if (resizing) {
+        const delta = (Math.abs(dx) > Math.abs(dy) ? dx : dy);
+        cR = Math.max(30, Math.min(Math.min(W, H) / 2 - 4, cR + delta * 0.5));
+        dSX = e.clientX; dSY = e.clientY;
+      }
+      const frame = area.querySelector('.crop-circle-frame');
+      if (frame) positionFrame(frame);
+      refreshPreviews();
+    }
+    function refreshPreviews() { drawPreview('prev-lg', 52); drawPreview('prev-sm', 32); }
+    function drawPreview(id, size) {
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const area = document.getElementById('crop-area');
+      const src  = document.getElementById('crop-source');
+      const aRect = area.getBoundingClientRect();
+      const sRect = src.getBoundingClientRect();
+      const scale = size / (cR * 2);
+      ctx.clearRect(0, 0, size, size);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2, 0, Math.PI*2);
+      ctx.clip();
+      const ix = (sRect.left - aRect.left - (cX - cR)) * scale;
+      const iy = (sRect.top  - aRect.top  - (cY - cR)) * scale;
+      const iw = sRect.width * scale;
+      const ih = sRect.height * scale;
+      const tmp = new Image();
+      tmp.onload = () => { ctx.drawImage(tmp, ix, iy, iw, ih); ctx.restore(); };
+      tmp.src = src.src;
+    }
+    function applyCrop() {
+      const size = 256;
+      const out  = document.createElement('canvas');
+      out.width = size; out.height = size;
+      const ctx  = out.getContext('2d');
+      const area = document.getElementById('crop-area');
+      const src  = document.getElementById('crop-source');
+      const aRect = area.getBoundingClientRect();
+      const sRect = src.getBoundingClientRect();
+      const scale = size / (cR * 2);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2, 0, Math.PI*2);
+      ctx.clip();
+      const ix = (sRect.left - aRect.left - (cX - cR)) * scale;
+      const iy = (sRect.top  - aRect.top  - (cY - cR)) * scale;
+      const iw = sRect.width * scale;
+      const ih = sRect.height * scale;
+      const tmp = new Image();
+      tmp.crossOrigin = 'anonymous';
+      tmp.onload = () => {
+        ctx.drawImage(tmp, ix, iy, iw, ih);
+        ctx.restore();
+        const dataURL = out.toDataURL('image/jpeg', 0.92);
+        if (!dataURL || dataURL === 'data:,' || dataURL.length < 100) {
+          showToast('❌ Failed to process image.'); return;
+        }
+        localStorage.setItem('ic_profile_photo', dataURL);
+        showAvatar(dataURL);
+        updateTopbarAvatar(dataURL);
+        closeModal();
+        showToast('✅ Profile photo updated!');
+      };
+      tmp.onerror = () => showToast('❌ Could not load image.');
+      tmp.src = src.src;
+    }
+    function updateTopbarAvatar(dataURL) {
+      const ta = document.getElementById('topbar-avatar');
+      if (!ta) return;
+      const user = getUser();
+      const initial = (user && user.full_name) ? user.full_name.charAt(0).toUpperCase() : 'M';
+      if (dataURL) {
+        ta.innerHTML = '';
+        ta.style.cssText = 'padding:0;overflow:hidden;background:#4a5568;width:36px;height:36px;border-radius:50%;';
+        const ti = document.createElement('img');
+        ti.src = dataURL;
+        ti.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;display:block;';
+        ti.onerror = () => { ta.textContent = initial; ta.style.cssText = ''; };
+        ta.appendChild(ti);
+      } else {
+        ta.textContent = initial;
+        ta.style.cssText = '';
+      }
+    }
+    function removePhoto() {
+      localStorage.removeItem('ic_profile_photo');
+      showAvatar(null);
+      updateTopbarAvatar(null);
+      showToast('🗑️ Profile photo removed.');
+    }
+    async function saveProfile() {
+      const name  = document.getElementById('profile-name').value.trim();
+      const email = document.getElementById('profile-email').value.trim();
+      if (!name || !email) { alert('Name and email cannot be empty.'); return; }
+      const currency = document.getElementById('pref-currency').value;
+      localStorage.setItem('ic_currency', currency);
+      const user = getUser();
+      if (user) { user.full_name = name; user.email = email; user.currency = currency; setUser(user); }
+      try { await Profile.update(name, email, currency, null); } catch (e) { console.warn(e.message); }
+      showToast('✅ Profile saved!');
+    }
+    function logout() {
+      if (confirm('Are you sure you want to log out?')) { Auth.logout(); }
+    }
+    function showToast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 2800);
+    }
+  </script>
+  <script src="currency.js"></script>
+  <script src="notifications.js"></script>
+  <script src="shared-avatar.js"></script>
+</body>
+</html>

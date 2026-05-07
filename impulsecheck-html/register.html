@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – Create Account</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .auth-page {
+      min-height: 100vh; background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 32px 16px;
+    }
+    .auth-card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 36px 44px 32px;
+      width: 100%; max-width: 520px;
+    }
+    .auth-card h2 { font-size: 22px; font-weight: 700; text-align: center; color: var(--text); margin-bottom: 24px; }
+
+    /* ── FORM INPUTS ── */
+    .field { margin-bottom: 14px; }
+    .field label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+    .field label .req { color: var(--red); margin-left: 2px; }
+    .input-wrap { position: relative; display: flex; align-items: center; }
+    .input-wrap .ic { position: absolute; left: 14px; color: #8fa3b1; display: flex; align-items: center; pointer-events: none; }
+    .input-wrap input {
+      width: 100%; background: var(--input-bg); border: 1.5px solid var(--input-border);
+      border-radius: var(--radius-sm); padding: 13px 42px 13px 42px;
+      font-size: 14px; font-family: 'Nunito', sans-serif; color: var(--text); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-wrap input.no-right { padding-right: 14px; }
+    .input-wrap input::placeholder { color: var(--text-light); }
+    .input-wrap input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,170,126,0.12); background: #fff; }
+    .input-wrap input.err { border-color: var(--red); }
+    .input-wrap input.ok  { border-color: var(--green); }
+    .toggle-pw {
+      position: absolute; right: 12px; background: none; border: none;
+      cursor: pointer; color: var(--text-light); padding: 4px;
+      display: flex; align-items: center; transition: color 0.15s;
+    }
+    .toggle-pw:hover { color: var(--text-muted); }
+
+    /* Two-column row */
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+    @media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
+
+    /* ── STRENGTH BAR ── */
+    .strength-wrap { margin-top: 8px; display: none; }
+    .strength-wrap.show { display: block; }
+    .strength-track { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 4px; }
+    .strength-fill  { height: 100%; border-radius: 99px; transition: width 0.3s, background 0.3s; width: 0%; }
+    .strength-lbl   { font-size: 11px; font-weight: 700; }
+
+    /* ── CRITERIA LIST ── */
+    .criteria { margin-top: 10px; display: none; }
+    .criteria.show { display: block; }
+    .crit {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; color: var(--text-light);
+      margin-bottom: 5px; transition: color 0.2s;
+    }
+    .crit.met { color: var(--green); }
+    .crit-icon {
+      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      border: 1.5px solid var(--border); background: var(--input-bg); transition: all 0.2s;
+    }
+    .crit.met .crit-icon { background: var(--green); border-color: var(--green); color: #fff; }
+
+    /* ── MATCH HINT ── */
+    .match-hint { font-size: 11px; font-weight: 600; margin-top: 5px; display: none; }
+    .match-hint.ok  { color: var(--green); display: block; }
+    .match-hint.bad { color: var(--red);   display: block; }
+
+    /* ── TERMS ── */
+    .terms-row {
+      display: flex; align-items: flex-start; gap: 10px;
+      background: var(--input-bg); border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px;
+      margin-bottom: 16px; transition: border-color 0.2s;
+    }
+    .terms-row.highlight { border-color: var(--red); background: #fdecea; }
+    .terms-cb { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; accent-color: var(--green); cursor: pointer; }
+    .terms-cb:disabled { cursor: not-allowed; opacity: 0.5; }
+    .terms-text { font-size: 13px; color: var(--text-muted); line-height: 1.5; }
+    .terms-text a { color: var(--green); font-weight: 700; cursor: pointer; }
+    .terms-text a:hover { text-decoration: underline; }
+    .terms-note { font-size: 11px; color: var(--tag-wait-fg); font-weight: 600; margin-top: 4px; }
+
+    /* ── TERMS MODAL ── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,35,0.6);
+      backdrop-filter: blur(4px); z-index: 1000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .modal-backdrop.open { opacity: 1; pointer-events: all; }
+    .modal {
+      background: #fff; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.18);
+      width: 100%; max-width: 520px; max-height: 80vh;
+      display: flex; flex-direction: column;
+      transform: scale(0.96) translateY(10px); transition: transform 0.2s;
+    }
+    .modal-backdrop.open .modal { transform: scale(1) translateY(0); }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 16px; border-bottom: 1.5px solid var(--border); flex-shrink: 0;
+    }
+    .modal-header h3 { font-size: 16px; font-weight: 800; color: var(--text); }
+    .modal-close {
+      background: var(--input-bg); border: none; width: 30px; height: 30px;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-muted);
+    }
+    .modal-close:hover { background: #e2e8f0; }
+    .modal-body { overflow-y: auto; padding: 20px 24px; flex: 1; }
+    .modal-body h4 { font-size: 14px; font-weight: 700; color: var(--text); margin: 16px 0 6px; }
+    .modal-body p  { font-size: 13px; color: var(--text-muted); line-height: 1.7; margin-bottom: 8px; }
+    .modal-footer {
+      padding: 16px 24px; border-top: 1.5px solid var(--border); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .scroll-note { font-size: 12px; color: var(--tag-wait-fg); font-weight: 600; }
+    .scroll-note.hidden { display: none; }
+    .btn-agree {
+      padding: 10px 24px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 700;
+      font-family: 'Nunito', sans-serif; border: none; cursor: pointer;
+      background: var(--green); color: #fff; opacity: 0.4; pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .btn-agree.enabled { opacity: 1; pointer-events: all; }
+
+    /* ── LOGIN ROW ── */
+    .login-row { text-align: center; font-size: 13px; color: var(--text-muted); margin-top: 14px; }
+    .login-row a { color: var(--blue-link); font-weight: 700; }
+
+    @media (max-width: 560px) { .auth-card { padding: 28px 20px 24px; } }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <img src="assets/logo.png" alt="" style="height:90px;width:auto;object-fit:contain;display:block;margin-bottom:28px;" />
+
+    <div class="auth-card">
+      <h2>Create Account</h2>
+      <div id="error-banner" class="error-banner" style="display:none"></div>
+
+      <!-- Full Name + Username -->
+      <div class="field-row">
+        <div class="field" style="margin:0">
+          <label>Full Name <span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+            <input type="text" id="full_name" placeholder="Your full name" class="no-right" autocomplete="name" />
+          </div>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Username <span class="req">*</span></label>
+          <div class="input-wrap">
+            <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></span>
+            <input type="text" id="username" placeholder="e.g. juan123" class="no-right" autocomplete="username" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="field">
+        <label>Email Address <span class="req">*</span></label>
+        <div class="input-wrap">
+          <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="2,4 12,13 22,4"/></svg></span>
+          <input type="email" id="email" placeholder="your@email.com" class="no-right" autocomplete="email" />
+        </div>
+      </div>
+
+      <!-- Phone + Age -->
+      <div class="field-row">
+        <div class="field" style="margin:0">
+          <label>Phone Number</label>
+          <div class="input-wrap">
+            <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.79 19.79 0 0 1 11.61 19 19.5 19.5 0 0 1 5 12.39 19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></span>
+            <input type="tel" id="phone_number" placeholder="+63 912 345 6789" class="no-right" />
+          </div>
+        </div>
+        <div class="field" style="margin:0">
+          <label>Age</label>
+          <div class="input-wrap">
+            <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+            <input type="number" id="age" placeholder="e.g. 20" min="13" max="100" class="no-right" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Date of Birth -->
+      <div class="field">
+        <label>Date of Birth</label>
+        <div class="input-wrap">
+          <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
+          <input type="date" id="date_of_birth" class="no-right" />
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div class="field">
+        <label>Password <span class="req">*</span></label>
+        <div class="input-wrap">
+          <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input type="password" id="password" placeholder="Create a strong password" oninput="onPwInput()" />
+          <button class="toggle-pw" type="button" onclick="togglePw('password', this)" tabindex="-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="strength-wrap" id="strength-wrap">
+          <div class="strength-track"><div class="strength-fill" id="strength-fill"></div></div>
+          <span class="strength-lbl" id="strength-lbl"></span>
+        </div>
+        <div class="criteria" id="criteria">
+          <div class="crit" id="c-len"><div class="crit-icon"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></div>At least 8 characters</div>
+          <div class="crit" id="c-up"><div class="crit-icon"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></div>1 uppercase letter (A–Z)</div>
+          <div class="crit" id="c-lo"><div class="crit-icon"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></div>1 lowercase letter (a–z)</div>
+          <div class="crit" id="c-num"><div class="crit-icon"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></div>1 number (0–9)</div>
+          <div class="crit" id="c-sp"><div class="crit-icon"><svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg></div>1 special character (!@#$%^&amp;*)</div>
+        </div>
+      </div>
+
+      <!-- Confirm Password -->
+      <div class="field">
+        <label>Confirm Password <span class="req">*</span></label>
+        <div class="input-wrap">
+          <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <input type="password" id="confirm" placeholder="Re-enter your password" oninput="onConfirmInput()" />
+          <button class="toggle-pw" type="button" onclick="togglePw('confirm', this)" tabindex="-1">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+        <div class="match-hint" id="match-hint"></div>
+      </div>
+
+      <!-- Terms & Conditions -->
+      <div class="terms-row" id="terms-row">
+        <input type="checkbox" class="terms-cb" id="terms-cb" disabled />
+        <div>
+          <div class="terms-text">
+            I have read and agree to the
+            <a onclick="openTerms()">Terms and Conditions</a>
+            and <a onclick="openTerms()">Privacy Policy</a>
+          </div>
+          <div class="terms-note" id="terms-note">📖 You must read the Terms and Conditions before agreeing.</div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="margin-top:4px" onclick="handleRegister()">Create Account</button>
+
+      <div class="login-row">
+        Already have an account? <a href="login.html">Log in</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- TERMS MODAL -->
+  <div class="modal-backdrop" id="terms-modal" onclick="closeTermsOutside(event)">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Terms and Conditions</h3>
+        <button class="modal-close" onclick="closeTerms()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="terms-body" onscroll="onTermsScroll()">
+        <p>Last updated: April 2026</p>
+        <h4>1. Acceptance of Terms</h4>
+        <p>By creating an account and using ImpulseCheck, you agree to be bound by these Terms and Conditions. If you do not agree with any part of these terms, you may not use the service.</p>
+        <h4>2. Description of Service</h4>
+        <p>ImpulseCheck is an AI-powered personal finance tool designed to help users make more intentional spending decisions. The application provides purchase recommendations based on user-provided financial data and emotional context.</p>
+        <h4>3. User Responsibilities</h4>
+        <p>You are responsible for maintaining the confidentiality of your account credentials. You agree to provide accurate and complete information during registration. You are solely responsible for all activity that occurs under your account.</p>
+        <h4>4. Privacy and Data</h4>
+        <p>ImpulseCheck collects personal information including name, email, date of birth, and financial behavior data solely for the purpose of providing personalized recommendations. We do not sell your data to third parties. All data is stored securely and accessed only by authorized systems.</p>
+        <h4>5. AI Recommendations Disclaimer</h4>
+        <p>The purchase recommendations provided by ImpulseCheck are generated by an AI model and are for informational and behavioral guidance purposes only. They do not constitute financial advice. ImpulseCheck is not liable for any financial decisions made based on AI recommendations.</p>
+        <h4>6. Account Termination</h4>
+        <p>We reserve the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or misuse the platform in any way.</p>
+        <h4>7. Modifications</h4>
+        <p>ImpulseCheck reserves the right to modify these Terms at any time. Continued use of the service after changes constitutes acceptance of the new terms.</p>
+        <h4>8. Contact</h4>
+        <p>For questions regarding these terms, please contact us at support@impulsecheck.app</p>
+        <p style="margin-top:20px;font-weight:700;color:var(--text);">By clicking "I Agree", you confirm that you have read, understood, and agree to these Terms and Conditions.</p>
+      </div>
+      <div class="modal-footer">
+        <span class="scroll-note" id="scroll-note">⬇ Scroll to the bottom to agree</span>
+        <button class="btn-agree" id="btn-agree" onclick="agreeTerms()">I Agree</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ═══════════════════════════════════
+       PASSWORD STRENGTH
+    ═══════════════════════════════════ */
+    const RULES = [
+      { id: 'c-len', test: p => p.length >= 8 },
+      { id: 'c-up',  test: p => /[A-Z]/.test(p) },
+      { id: 'c-lo',  test: p => /[a-z]/.test(p) },
+      { id: 'c-num', test: p => /[0-9]/.test(p) },
+      { id: 'c-sp',  test: p => /[!@#$%^&*]/.test(p) },
+    ];
+    const LEVELS = [
+      { lbl: '',            color: '',        w: '0%'   },
+      { lbl: 'Very Weak',   color: '#e53935', w: '20%'  },
+      { lbl: 'Weak',        color: '#f0a830', w: '40%'  },
+      { lbl: 'Fair',        color: '#ffcc00', w: '60%'  },
+      { lbl: 'Strong',      color: '#2eaa7e', w: '80%'  },
+      { lbl: 'Very Strong', color: '#1e8a63', w: '100%' },
+    ];
+
+    function onPwInput() {
+      const pw  = document.getElementById('password').value;
+      const inp = document.getElementById('password');
+      document.getElementById('criteria').classList.toggle('show', pw.length > 0);
+      document.getElementById('strength-wrap').classList.toggle('show', pw.length > 0);
+      let count = 0;
+      RULES.forEach(r => {
+        const el = document.getElementById(r.id);
+        const ok = r.test(pw);
+        el.className = 'crit ' + (ok ? 'met' : '');
+        if (ok) count++;
+      });
+      const lv = LEVELS[count];
+      document.getElementById('strength-fill').style.cssText = `width:${lv.w};background:${lv.color}`;
+      const lbl = document.getElementById('strength-lbl');
+      lbl.textContent = lv.lbl; lbl.style.color = lv.color;
+      inp.className = pw.length === 0 ? 'no-right' : count === 5 ? 'no-right ok' : 'no-right';
+      if (document.getElementById('confirm').value) onConfirmInput();
+    }
+
+    function onConfirmInput() {
+      const pw = document.getElementById('password').value;
+      const cf = document.getElementById('confirm').value;
+      const h  = document.getElementById('match-hint');
+      const i  = document.getElementById('confirm');
+      if (!cf) { h.className = 'match-hint'; i.className = ''; return; }
+      if (pw === cf) { h.textContent = '✓ Passwords match'; h.className = 'match-hint ok'; i.className = 'ok'; }
+      else           { h.textContent = '✗ Passwords do not match'; h.className = 'match-hint bad'; i.className = 'err'; }
+    }
+
+    function togglePw(id, btn) {
+      const inp = document.getElementById(id);
+      const hide = inp.type === 'password';
+      inp.type = hide ? 'text' : 'password';
+      btn.innerHTML = hide
+        ? `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`
+        : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+    }
+
+    /* ═══════════════════════════════════
+       TERMS MODAL
+    ═══════════════════════════════════ */
+    let termsRead = false;
+
+    function openTerms() {
+      document.getElementById('terms-modal').classList.add('open');
+    }
+    function closeTerms() {
+      document.getElementById('terms-modal').classList.remove('open');
+    }
+    function closeTermsOutside(e) {
+      if (e.target.id === 'terms-modal') closeTerms();
+    }
+    function onTermsScroll() {
+      const body = document.getElementById('terms-body');
+      const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 20;
+      if (atBottom) {
+        document.getElementById('btn-agree').classList.add('enabled');
+        document.getElementById('scroll-note').classList.add('hidden');
+      }
+    }
+    function agreeTerms() {
+      termsRead = true;
+      const cb = document.getElementById('terms-cb');
+      cb.disabled = false;
+      cb.checked  = true;
+      document.getElementById('terms-note').style.display = 'none';
+      document.getElementById('terms-row').classList.remove('highlight');
+      closeTerms();
+    }
+
+    /* ═══════════════════════════════════
+       REGISTER
+    ═══════════════════════════════════ */
+    async function handleRegister() {
+      const full_name     = document.getElementById('full_name').value.trim();
+      const username      = document.getElementById('username').value.trim();
+      const email         = document.getElementById('email').value.trim();
+      const phone_number  = document.getElementById('phone_number').value.trim();
+      const age           = document.getElementById('age').value;
+      const date_of_birth = document.getElementById('date_of_birth').value;
+      const pw            = document.getElementById('password').value;
+      const confirm       = document.getElementById('confirm').value;
+
+      // Required
+      if (!full_name || !username || !email || !pw || !confirm) {
+        showError('Please fill in all required fields.'); return;
+      }
+      // Email
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError('Please enter a valid email address.'); return;
+      }
+      // Password
+      if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(pw)) {
+        showError('Password does not meet the requirements.');
+        document.getElementById('criteria').classList.add('show');
+        document.getElementById('strength-wrap').classList.add('show');
+        onPwInput(); return;
+      }
+      // Match
+      if (pw !== confirm) { showError('Passwords do not match.'); onConfirmInput(); return; }
+      // Terms
+      if (!document.getElementById('terms-cb').checked) {
+        document.getElementById('terms-row').classList.add('highlight');
+        showError('You must read and agree to the Terms and Conditions.');
+        document.getElementById('terms-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      hideError();
+
+      try {
+        const res  = await fetch('http://127.0.0.1:5000/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ full_name, username, email, phone_number, age: age||null, date_of_birth: date_of_birth||null, password: pw }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) { showError(data.error); return; }
+
+        // Save user_id for OTP page
+        sessionStorage.setItem('otp_user_id', data.user_id);
+        sessionStorage.setItem('otp_email', email);
+        window.location.href = 'verify-otp.html';
+
+      } catch (err) {
+        showError('Cannot connect to server. Make sure the backend is running.');
+      }
+    }
+
+    function showError(msg) {
+      const b = document.getElementById('error-banner');
+      b.textContent = msg; b.style.display = 'block';
+      b.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    function hideError() { document.getElementById('error-banner').style.display = 'none'; }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
+  </script>
+</body>
+</html>
