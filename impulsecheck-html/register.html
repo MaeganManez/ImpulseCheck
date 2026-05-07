@@ -427,7 +427,7 @@
       hideError();
 
       try {
-        const res  = await fetch('http://127.0.0.1:5000/api/auth/register', {
+        const res  = await fetch('https://impulsecheck-backend.onrender.com/api/auth/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ full_name, username, email, phone_number, age: age||null, date_of_birth: date_of_birth||null, password: pw }),

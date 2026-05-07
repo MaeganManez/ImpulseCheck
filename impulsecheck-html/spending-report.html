@@ -371,7 +371,7 @@
       const token = localStorage.getItem('ic_token');
       if (!token) { showToast('⚠️ Please log in first.'); closeReportModal(); return; }
       try {
-        const res  = await fetch('http://127.0.0.1:5000/api/report/send', {
+        const res  = await fetch('https://impulsecheck-backend.onrender.com/api/report/send', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
           body: JSON.stringify({ period: selectedPeriod })
