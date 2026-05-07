@@ -5,7 +5,7 @@
      <script src="api.js"></script>
    ============================================================ */
 
-const API_BASE = 'http://127.0.0.1:5000/api';
+const API_BASE = 'https://impulsecheck-backend.onrender.com/api';
 
 /* ════════════════════════════════════════
    TOKEN HELPERS
