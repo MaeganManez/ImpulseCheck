@@ -1,12 +1,14 @@
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, {
+  apiVersion: 'v1'
+});
 
 async function scanProduct(req, res) {
   try {
     const { imageBase64, mimeType } = req.body;
     if (!imageBase64) return res.status(400).json({ error: 'No image provided.' });
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const prompt = `You are an AI spending intervention assistant for students. Analyze this product image and return ONLY a valid JSON object with no markdown, no explanation, no extra text — just the raw JSON.
 {
   "productName": "best guess of the product name",
