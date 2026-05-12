@@ -23,17 +23,165 @@
       border-bottom: 1.5px solid var(--border);
     }
     .page-card-body { padding: 24px 28px 28px; }
-    .peso-input-wrap {
-      position: relative;
+
+    /* ── INPUT METHOD TOGGLE ── */
+    .input-method-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 22px;
+    }
+    .method-btn {
+      flex: 1;
+      padding: 11px 14px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
       display: flex;
       align-items: center;
+      justify-content: center;
+      gap: 7px;
+      transition: all 0.15s;
+    }
+    .method-btn.active {
+      border-color: var(--green);
+      background: var(--green-light);
+      color: var(--green);
+    }
+    .method-btn:hover:not(.active) {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    /* ── SCANNER PANEL ── */
+    .scanner-panel {
+      display: none;
+      margin-bottom: 20px;
+    }
+    .scanner-panel.visible { display: block; }
+
+    .scanner-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 100%);
+      border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .scanner-header-icon {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; flex-shrink: 0;
+    }
+    .scanner-header-text h3 { font-size: 14px; font-weight: 700; color: #fff; margin: 0 0 1px; }
+    .scanner-header-text p  { font-size: 11px; color: rgba(255,255,255,0.7); margin: 0; }
+
+    .scanner-body {
+      border: 1.5px solid var(--border);
+      border-top: none;
+      border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+      padding: 16px;
+    }
+
+    /* Upload zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 24px 16px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      transition: border-color 0.2s, background 0.2s;
+      margin-bottom: 12px;
+    }
+    .upload-zone:hover { border-color: var(--green); background: rgba(46,170,126,0.04); }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-zone-icon { font-size: 28px; margin-bottom: 6px; }
+    .upload-zone p { font-size: 13px; color: var(--text-muted); margin: 0; }
+    .upload-zone p strong { color: var(--green); }
+
+    #scan-preview {
+      width: 100%; max-height: 200px; object-fit: contain;
+      border-radius: var(--radius-sm); border: 1px solid var(--border);
+      margin-bottom: 12px; display: none;
+    }
+
+    .scan-analyze-btn {
+      width: 100%; padding: 12px;
+      background: #2d1b69; color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      font-size: 14px; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: opacity 0.2s;
+      display: none;
+    }
+    .scan-analyze-btn:hover { opacity: 0.88; }
+
+    /* Scan loader */
+    .scan-loader {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px 0;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .scan-loader.visible { display: flex; }
+
+    /* Scan result strip */
+    .scan-result-strip {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      background: var(--green-light);
+      border: 1.5px solid var(--green);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      margin-top: 12px;
+    }
+    .scan-result-strip.visible { display: flex; }
+    .scan-result-strip .srs-icon { font-size: 22px; flex-shrink: 0; }
+    .scan-result-strip .srs-info { flex: 1; }
+    .scan-result-strip .srs-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .scan-result-strip .srs-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .scan-result-strip .srs-risk {
+      font-size: 11px; font-weight: 700;
+      padding: 3px 8px; border-radius: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Risk bar inside scanner */
+    .scan-risk-wrap { margin-top: 10px; }
+    .scan-risk-top { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+    .scan-risk-track { height: 6px; border-radius: 99px; background: var(--border); overflow: hidden; }
+    .scan-risk-fill  { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+
+    .scan-prefill-notice {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--green-light);
+      border: 1.5px solid var(--green);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px;
+      font-size: 13px; color: #1a6e50; font-weight: 500;
+      margin-bottom: 18px;
+    }
+    .scan-prefill-notice span { font-size: 18px; flex-shrink: 0; }
+
+    /* Price input */
+    .peso-input-wrap {
+      position: relative; display: flex; align-items: center;
     }
     .peso-input-wrap .peso-icon {
-      position: absolute;
-      left: 14px;
-      display: flex;
-      align-items: center;
-      color: var(--text-muted);
+      position: absolute; left: 14px;
+      display: flex; align-items: center; color: var(--text-muted);
     }
     .peso-input-wrap input {
       width: 100%;
@@ -41,9 +189,7 @@
       border: 1.5px solid var(--input-border);
       border-radius: var(--radius-sm);
       padding: 13px 14px 13px 42px;
-      font-size: 14px;
-      color: var(--text);
-      outline: none;
+      font-size: 14px; color: var(--text); outline: none;
       transition: border-color 0.2s, box-shadow 0.2s;
     }
     .peso-input-wrap input:focus {
@@ -51,10 +197,13 @@
       box-shadow: 0 0 0 3px rgba(46,170,126,0.12);
       background: #fff;
     }
+
     .btn-analyze { margin-top: 8px; }
+
     @media (max-width: 640px) {
       .page-card-title { padding: 18px 16px 14px; font-size: 17px; }
       .page-card-body  { padding: 16px 16px 20px; }
+      .input-method-row { flex-direction: column; }
     }
   </style>
 </head>
@@ -80,6 +229,74 @@
 
         <div id="error-banner" class="error-banner" style="display:none"></div>
 
+        <!-- Scanner autofill notice -->
+        <div class="scan-prefill-notice" id="scan-prefill-notice" style="display:none;">
+          <span>📷</span>
+          Product pre-filled from image scan — review and complete the form below.
+        </div>
+
+        <!-- ── INPUT METHOD TOGGLE ── -->
+        <div class="input-method-row">
+          <button class="method-btn active" id="btn-manual" onclick="switchMethod('manual')">
+            ✏️ Type Manually
+          </button>
+          <button class="method-btn" id="btn-scan" onclick="switchMethod('scan')">
+            📷 Scan Product Image
+          </button>
+        </div>
+
+        <!-- ── SCANNER PANEL ── -->
+        <div class="scanner-panel" id="scanner-panel">
+          <div class="scanner-header">
+            <div class="scanner-header-icon">📷</div>
+            <div class="scanner-header-text">
+              <h3>AI Product Scanner</h3>
+              <p>Take a photo — AI identifies the product and fills the form for you</p>
+            </div>
+          </div>
+          <div class="scanner-body">
+
+            <img id="scan-preview" alt="Product preview" />
+
+            <div class="upload-zone" id="upload-zone">
+              <input type="file" id="scan-image-input" accept="image/*" capture="environment" onchange="handleScanImage(event)" />
+              <div class="upload-zone-icon">🖼️</div>
+              <p>Tap to upload or <strong>take a photo</strong></p>
+              <p style="margin-top:4px;font-size:12px;">JPG, PNG, WEBP · max 5 MB</p>
+            </div>
+
+            <button class="scan-analyze-btn" id="scan-analyze-btn" onclick="runScan()">
+              ✨ Analyze with AI Vision
+            </button>
+
+            <div class="scan-loader" id="scan-loader">
+              <div class="spinner"></div>
+              Identifying product with AI…
+            </div>
+
+            <!-- Result strip shown after scan -->
+            <div class="scan-result-strip" id="scan-result-strip">
+              <div class="srs-icon" id="srs-icon">🛍️</div>
+              <div class="srs-info">
+                <div class="srs-name" id="srs-name">—</div>
+                <div class="srs-meta" id="srs-meta">—</div>
+                <div class="scan-risk-wrap">
+                  <div class="scan-risk-top">
+                    <span>Impulse risk</span>
+                    <span id="srs-risk-label">—</span>
+                  </div>
+                  <div class="scan-risk-track">
+                    <div class="scan-risk-fill" id="srs-risk-fill" style="width:0%"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="srs-risk" id="srs-risk-badge">—</div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ── FORM FIELDS ── -->
         <div class="field">
           <label>Item Name</label>
           <div class="input-wrap">
@@ -142,6 +359,7 @@
 
   <script src="currency.js"></script>
   <script>
+    // ── Build category dropdown ──
     const ALL_CATS  = ['Food','Transport','Shopping','Entertainment','Health','Bills','Others'];
     const savedCats = JSON.parse(localStorage.getItem('ic_categories') || 'null') || ALL_CATS;
     const catSelect = document.getElementById('item-category');
@@ -156,9 +374,126 @@
       catSelect.appendChild(opt);
     }
 
+    // ── Currency symbol ──
     const symEl = document.getElementById('price-symbol');
     if (symEl) symEl.textContent = getCurrencySymbol();
 
+    // ── Scanner autofill (coming from ai-recommendation scanner) ──
+    const scanPrefill = JSON.parse(sessionStorage.getItem('ic_scan_prefill') || 'null');
+    if (scanPrefill) {
+      const nameInput = document.getElementById('item-name');
+      if (nameInput && scanPrefill.name) nameInput.value = scanPrefill.name;
+      if (scanPrefill.category) {
+        const match = [...catSelect.options].find(
+          o => o.value.toLowerCase() === scanPrefill.category.toLowerCase()
+        );
+        if (match) catSelect.value = match.value;
+      }
+      document.getElementById('scan-prefill-notice').style.display = 'flex';
+      sessionStorage.removeItem('ic_scan_prefill');
+    }
+
+    // ── Method toggle ──
+    function switchMethod(method) {
+      const isScanner = method === 'scan';
+      document.getElementById('btn-manual').classList.toggle('active', !isScanner);
+      document.getElementById('btn-scan').classList.toggle('active', isScanner);
+      document.getElementById('scanner-panel').classList.toggle('visible', isScanner);
+    }
+
+    // ── Image select ──
+    let scanBase64 = null, scanMimeType = null;
+
+    function handleScanImage(evt) {
+      const file = evt.target.files[0]; if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { alert('Image too large. Max 5 MB.'); return; }
+      scanMimeType = file.type;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        scanBase64 = e.target.result.split(',')[1];
+        const preview = document.getElementById('scan-preview');
+        preview.src = e.target.result; preview.style.display = 'block';
+        document.getElementById('upload-zone').style.display      = 'none';
+        document.getElementById('scan-analyze-btn').style.display = 'block';
+        document.getElementById('scan-result-strip').classList.remove('visible');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ── Run scan ──
+    async function runScan() {
+      if (!scanBase64) return;
+      document.getElementById('scan-analyze-btn').style.display = 'none';
+      document.getElementById('scan-loader').classList.add('visible');
+      document.getElementById('scan-result-strip').classList.remove('visible');
+
+      try {
+        const token = localStorage.getItem('ic_token') || localStorage.getItem('token') || '';
+        const res = await fetch('https://impulsecheck-backend.onrender.com/api/ai/scan-product', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body:    JSON.stringify({ imageBase64: scanBase64, mimeType: scanMimeType }),
+        });
+        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Scan failed'); }
+        const json = await res.json();
+        applyToForm(json.data);
+      } catch (err) {
+        console.error('[Scanner]', err.message);
+        alert('Scan failed: ' + err.message);
+        document.getElementById('scan-analyze-btn').style.display = 'block';
+      } finally {
+        document.getElementById('scan-loader').classList.remove('visible');
+      }
+    }
+
+    // ── Apply scan result to form + show strip ──
+    function applyToForm(d) {
+      // Fill item name
+      const nameEl = document.getElementById('item-name');
+      if (d.productName) nameEl.value = d.productName;
+
+      // Fill category
+      if (d.category) {
+        const match = [...catSelect.options].find(
+          o => o.value.toLowerCase() === d.category.toLowerCase()
+        );
+        if (match) catSelect.value = match.value;
+      }
+
+      // Show result strip
+      const riskColors = { Low: '#2eaa7e', Moderate: '#f0a830', High: '#e53935', 'Very High': '#e53935' };
+      const rc = riskColors[d.impulseRiskLabel] || '#888';
+      const catEmoji = { Electronics:'📱', Clothing:'👗', Food:'🍔', Beauty:'💄', Home:'🏠', Entertainment:'🎮', Sports:'⚽', Education:'📚', Other:'🛍️' };
+
+      document.getElementById('srs-icon').textContent  = catEmoji[d.category] || '🛍️';
+      document.getElementById('srs-name').textContent  = d.productName || 'Unknown product';
+      document.getElementById('srs-meta').textContent  =
+        (d.category || '') + ' · ' + (d.needVsWant || '') +
+        (d.estimatedPriceRange ? ' · ₱' + d.estimatedPriceRange.min + '–₱' + d.estimatedPriceRange.max : '');
+
+      const fill = document.getElementById('srs-risk-fill');
+      fill.style.width      = (d.impulseRiskScore || 0) + '%';
+      fill.style.background = rc;
+      document.getElementById('srs-risk-label').textContent = d.impulseRiskLabel || '—';
+
+      const badge = document.getElementById('srs-risk-badge');
+      badge.textContent       = d.impulseRiskLabel || '—';
+      badge.style.background  = rc + '22';
+      badge.style.color       = rc;
+      badge.style.border      = `1px solid ${rc}`;
+
+      document.getElementById('scan-result-strip').classList.add('visible');
+
+      // Auto-switch to show the form is filled
+      nameEl.style.borderColor = 'var(--green)';
+      catSelect.style.borderColor = 'var(--green)';
+      setTimeout(() => {
+        nameEl.style.borderColor = '';
+        catSelect.style.borderColor = '';
+      }, 2000);
+    }
+
+    // ── Analyze ──
     function analyzePurchase() {
       const name     = document.getElementById('item-name').value.trim();
       const price    = parseFloat(document.getElementById('item-price').value);

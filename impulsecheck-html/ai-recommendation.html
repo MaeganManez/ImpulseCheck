@@ -19,7 +19,6 @@
     .ai-loading-card p  { font-size: 14px; color: var(--text-muted); margin-bottom: 36px; line-height: 1.5; }
     .ai-steps { text-align: left; max-width: 320px; margin: 0 auto; }
 
-    /* ── RESULT CARD ── */
     .ai-result-card {
       background: var(--card);
       border-radius: var(--radius);
@@ -29,135 +28,159 @@
       margin: 0 auto;
       display: none;
     }
-
-    /* Color bar at top */
     .ai-result-banner {
       padding: 20px 28px 18px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
+      display: flex; align-items: center; gap: 16px;
     }
     .ai-banner-icon {
-      width: 48px; height: 48px;
-      border-radius: 50%;
+      width: 48px; height: 48px; border-radius: 50%;
       background: rgba(255,255,255,0.25);
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      font-size: 22px;
+      flex-shrink: 0; font-size: 22px;
     }
-    .ai-banner-text h2 {
-      font-size: 20px;
-      font-weight: 800;
-      color: #fff;
-      margin: 0 0 3px;
-    }
-    .ai-banner-text p {
-      font-size: 13px;
-      color: rgba(255,255,255,0.85);
-      margin: 0;
-    }
-
+    .ai-banner-text h2 { font-size: 20px; font-weight: 800; color: #fff; margin: 0 0 3px; }
+    .ai-banner-text p  { font-size: 13px; color: rgba(255,255,255,0.85); margin: 0; }
     .ai-result-body { padding: 26px 28px 24px; }
-
-    /* Item row */
     .ai-item-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--input-bg);
-      border-radius: var(--radius-sm);
-      padding: 14px 16px;
-      margin-bottom: 20px;
+      display: flex; align-items: center; gap: 12px;
+      background: var(--input-bg); border-radius: var(--radius-sm);
+      padding: 14px 16px; margin-bottom: 20px;
     }
     .ai-item-emoji { font-size: 24px; }
     .ai-item-info strong { font-size: 16px; font-weight: 800; color: var(--text); display: block; }
     .ai-item-info span   { font-size: 13px; color: var(--text-muted); }
-
-    /* Sections */
     .ai-section { margin-bottom: 20px; }
     .ai-section-label {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 10px;
+      font-size: 11px; font-weight: 800; letter-spacing: 1px;
+      color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;
     }
-
-    /* Reasons */
     .ai-reasons { display: flex; flex-direction: column; gap: 8px; }
     .ai-reason {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text);
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; font-weight: 500; color: var(--text);
     }
     .check-circle {
-      width: 20px; height: 20px;
-      border-radius: 50%;
+      width: 20px; height: 20px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-      color: #fff;
+      flex-shrink: 0; margin-top: 1px; color: #fff;
     }
-
-    /* Advice box */
     .ai-advice-box {
       background: var(--input-bg);
       border-left: 3px solid var(--green);
       border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-      padding: 14px 16px;
-      font-size: 13px;
-      color: var(--text);
-      line-height: 1.6;
+      padding: 14px 16px; font-size: 13px; color: var(--text); line-height: 1.6;
     }
-
-    /* Alternative box */
     .ai-alt-box {
-      background: var(--input-bg);
-      border-radius: var(--radius-sm);
-      padding: 14px 16px;
-      font-size: 13px;
-      color: var(--text);
-      line-height: 1.6;
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
+      background: var(--input-bg); border-radius: var(--radius-sm);
+      padding: 14px 16px; font-size: 13px; color: var(--text); line-height: 1.6;
+      display: flex; align-items: flex-start; gap: 10px;
     }
-    .ai-alt-icon {
-      font-size: 18px;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
+    .ai-alt-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
     .ai-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-
-    /* Decision buttons */
     .decision-row { display: flex; gap: 10px; }
     .decision-row .btn { flex: 1; margin: 0; padding: 13px; font-size: 13px; }
-
-    /* Fallback badge */
     .fallback-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: #fff3e0;
-      color: #e68a00;
-      border: 1px solid #f0c060;
-      border-radius: 20px;
-      padding: 4px 10px;
-      font-size: 11px;
-      font-weight: 700;
-      margin-bottom: 16px;
+      display: inline-flex; align-items: center; gap: 5px;
+      background: #fff3e0; color: #e68a00;
+      border: 1px solid #f0c060; border-radius: 20px;
+      padding: 4px 10px; font-size: 11px; font-weight: 700; margin-bottom: 16px;
     }
+
+    /* ── SCANNER SECTION ── */
+    .scanner-wrap { max-width: 680px; margin: 32px auto 0; }
+    .scanner-toggle {
+      width: 100%; background: var(--card);
+      border: 1.5px dashed var(--border); border-radius: var(--radius);
+      padding: 16px 20px; cursor: pointer;
+      display: flex; align-items: center; gap: 12px;
+      color: var(--text-muted); font-size: 14px; font-weight: 600;
+      font-family: inherit; transition: border-color 0.2s, color 0.2s; margin-bottom: 0;
+    }
+    .scanner-toggle:hover { border-color: var(--green); color: var(--green); }
+    .scanner-card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden; margin-top: 12px; display: none;
+    }
+    .scanner-card.open { display: block; }
+    .scanner-header {
+      background: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 100%);
+      padding: 18px 24px; display: flex; align-items: center; gap: 12px;
+    }
+    .scanner-header-icon {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .scanner-header-text h3 { font-size: 16px; font-weight: 800; color: #fff; margin: 0 0 2px; }
+    .scanner-header-text p  { font-size: 12px; color: rgba(255,255,255,0.7); margin: 0; }
+    .scanner-body { padding: 22px 24px; }
+    .upload-zone {
+      border: 2px dashed var(--border); border-radius: var(--radius-sm);
+      padding: 28px 20px; text-align: center; cursor: pointer;
+      position: relative; transition: border-color 0.2s, background 0.2s; margin-bottom: 14px;
+    }
+    .upload-zone:hover { border-color: var(--green); background: rgba(46,170,126,0.04); }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+    }
+    .upload-zone-icon { font-size: 32px; margin-bottom: 8px; }
+    .upload-zone p { font-size: 13px; color: var(--text-muted); margin: 0; }
+    .upload-zone p strong { color: var(--green); }
+    #scan-preview {
+      width: 100%; max-height: 220px; object-fit: contain;
+      border-radius: var(--radius-sm); border: 1px solid var(--border);
+      margin-bottom: 14px; display: none;
+    }
+    .scan-result-area { display: none; margin-top: 18px; }
+    .scan-result-area.visible { display: block; }
+    .scan-result-banner {
+      border-radius: var(--radius-sm); padding: 14px 16px;
+      margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
+    }
+    .scan-result-banner .srb-icon { font-size: 28px; flex-shrink: 0; }
+    .scan-result-banner .srb-name { font-size: 16px; font-weight: 800; color: var(--text); margin: 0 0 2px; }
+    .scan-result-banner .srb-meta { font-size: 12px; color: var(--text-muted); margin: 0; }
+    .scan-info-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
+    }
+    .scan-info-cell { background: var(--input-bg); border-radius: var(--radius-sm); padding: 11px 13px; }
+    .scan-info-cell .sic-label { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+    .scan-info-cell .sic-val   { font-size: 14px; font-weight: 700; color: var(--text); }
+    .risk-bar-wrap { margin-bottom: 14px; }
+    .risk-bar-top  { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+    .risk-bar-track { height: 8px; border-radius: 99px; background: var(--border); overflow: hidden; }
+    .risk-bar-fill  { height: 100%; border-radius: 99px; transition: width 0.8s ease; }
+    .scan-message {
+      background: var(--input-bg); border-left: 3px solid var(--green);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      padding: 12px 14px; font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 12px;
+    }
+    .scan-alts { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+    .scan-alt-item {
+      display: flex; align-items: flex-start; gap: 8px;
+      font-size: 13px; color: var(--text); background: var(--input-bg);
+      border-radius: var(--radius-sm); padding: 10px 12px;
+    }
+    .scan-alt-arrow { color: var(--green); font-weight: 700; flex-shrink: 0; }
+    .scan-autofill-btn {
+      width: 100%; margin-top: 14px; padding: 13px;
+      background: var(--green); color: #fff; border: none;
+      border-radius: var(--radius-sm); font-size: 14px; font-weight: 700;
+      font-family: inherit; cursor: pointer; transition: opacity 0.2s;
+    }
+    .scan-autofill-btn:hover { opacity: 0.88; }
+    .scan-loader { display: none; flex-direction: column; align-items: center; padding: 28px 0; gap: 12px; }
+    .scan-loader.visible { display: flex; }
+    .scan-loader p { font-size: 13px; color: var(--text-muted); }
 
     @media (max-width: 600px) {
       .ai-loading-card { padding: 36px 20px 32px; }
       .ai-result-body  { padding: 20px 16px 20px; }
       .decision-row    { flex-direction: column; }
       .ai-banner-text h2 { font-size: 17px; }
+      .scanner-body { padding: 16px; }
+      .scan-info-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -218,13 +241,10 @@
           <p id="banner-subtitle"></p>
         </div>
       </div>
-
       <div class="ai-result-body">
         <div id="fallback-notice" style="display:none;">
           <div class="fallback-badge">⚡ Quick analysis — AI unavailable</div>
         </div>
-
-        <!-- Item summary -->
         <div class="ai-item-row">
           <div class="ai-item-emoji" id="item-emoji">🛍️</div>
           <div class="ai-item-info">
@@ -232,22 +252,15 @@
             <span id="item-meta"></span>
           </div>
         </div>
-
-        <!-- Reasons -->
         <div class="ai-section">
           <div class="ai-section-label">Why this recommendation</div>
           <div class="ai-reasons" id="result-reasons"></div>
         </div>
-
         <hr class="ai-divider" />
-
-        <!-- AI Advice -->
         <div class="ai-section">
           <div class="ai-section-label">💬 AI Advice</div>
           <div class="ai-advice-box" id="result-advice"></div>
         </div>
-
-        <!-- Better Alternative -->
         <div class="ai-section">
           <div class="ai-section-label">💡 Better Alternative</div>
           <div class="ai-alt-box">
@@ -255,10 +268,7 @@
             <div id="result-alternative"></div>
           </div>
         </div>
-
         <hr class="ai-divider" />
-
-        <!-- Decision buttons -->
         <div class="decision-row">
           <button class="btn btn-buy"   onclick="decide('BUY')">✅ Save as Buy</button>
           <button class="btn btn-delay" onclick="decide('WAIT')">⏳ Save as Delayed</button>
@@ -267,7 +277,65 @@
       </div>
     </div>
 
-  </div>
+    <!-- SCANNER SECTION -->
+    <div class="scanner-wrap" id="scanner-wrap" style="display:none;">
+      <button class="scanner-toggle" onclick="toggleScanner()">
+        <span style="font-size:20px;">📷</span>
+        Scan a product image instead — use AI Vision
+        <span style="margin-left:auto;font-size:18px;" id="scanner-chevron">▾</span>
+      </button>
+      <div class="scanner-card" id="scanner-card">
+        <div class="scanner-header">
+          <div class="scanner-header-icon">📷</div>
+          <div class="scanner-header-text">
+            <h3>Product Image Scanner</h3>
+            <p>Take a photo or upload an image — AI identifies the product and scores impulse risk</p>
+          </div>
+        </div>
+        <div class="scanner-body">
+          <img id="scan-preview" alt="Product to scan" />
+          <div class="upload-zone" id="upload-zone">
+            <input type="file" id="scan-image-input" accept="image/*" capture="environment" onchange="handleScanImage(event)" />
+            <div class="upload-zone-icon">🖼️</div>
+            <p>Tap to upload or <strong>take a photo</strong></p>
+            <p style="margin-top:4px;font-size:12px;">JPG, PNG, WEBP · max 5 MB</p>
+          </div>
+          <button class="btn btn-buy" id="scan-btn"
+            style="width:100%;margin:0;padding:13px;font-size:14px;display:none;"
+            onclick="runScan()">✨ Analyze with AI Vision</button>
+          <div class="scan-loader" id="scan-loader">
+            <div class="spinner"></div>
+            <p>Identifying product with Gemini Vision…</p>
+          </div>
+          <div class="scan-result-area" id="scan-result-area">
+            <div class="scan-result-banner" id="srb-banner">
+              <div class="srb-icon" id="srb-icon">🛍️</div>
+              <div>
+                <p class="srb-name" id="srb-name">—</p>
+                <p class="srb-meta" id="srb-meta">—</p>
+              </div>
+            </div>
+            <div class="scan-info-grid">
+              <div class="scan-info-cell"><div class="sic-label">Category</div><div class="sic-val" id="sic-category">—</div></div>
+              <div class="scan-info-cell"><div class="sic-label">Need vs Want</div><div class="sic-val" id="sic-need">—</div></div>
+              <div class="scan-info-cell"><div class="sic-label">Est. Price Range</div><div class="sic-val" id="sic-price">—</div></div>
+              <div class="scan-info-cell"><div class="sic-label">Impulse Score</div><div class="sic-val" id="sic-score">—</div></div>
+            </div>
+            <div class="risk-bar-wrap">
+              <div class="risk-bar-top"><span>Impulse risk</span><span id="sic-risk-label">—</span></div>
+              <div class="risk-bar-track"><div class="risk-bar-fill" id="risk-bar-fill" style="width:0%"></div></div>
+            </div>
+            <div class="ai-section-label" style="margin-bottom:8px;">💬 AI Intervention</div>
+            <div class="scan-message" id="scan-message">—</div>
+            <div class="ai-section-label" style="margin-bottom:8px;">💡 Alternatives</div>
+            <div class="scan-alts" id="scan-alts"></div>
+            <button class="scan-autofill-btn" onclick="autofillPurchase()">➜ Use this product in a Purchase Check</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
 
   <script src="api.js"></script>
   <script src="currency.js"></script>
@@ -275,21 +343,14 @@
     const pending = JSON.parse(sessionStorage.getItem('ic_pending') || 'null');
     if (!pending) { window.location.href = 'dashboard.html'; }
 
-    /* ── Color + icon maps ── */
     const colorMap = { AVOID: '#e53935', WAIT: '#f0a830', BUY: '#2eaa7e' };
-    const bgMap    = { AVOID: '#fdecea', WAIT: '#fff8ee', BUY:  '#e6f5f0' };
-    const iconMap  = {
-      AVOID: '🚫',
-      WAIT:  '⏳',
-      BUY:   '✅',
-    };
+    const iconMap  = { AVOID: '🚫', WAIT: '⏳', BUY: '✅' };
     const categoryEmoji = {
       food: '🍔', clothing: '👗', electronics: '📱', health: '💊',
       entertainment: '🎮', transport: '🚗', education: '📚',
       beauty: '💄', sports: '⚽', home: '🏠', others: '🛍️',
     };
 
-    /* ── Loading animation helpers ── */
     function checkSVG() {
       return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>`;
     }
@@ -297,135 +358,109 @@
       return `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="4"/></svg>`;
     }
     function markStepDone(id) {
-      const el = document.getElementById(id);
-      if (!el) return;
+      const el = document.getElementById(id); if (!el) return;
       el.querySelector('.ai-step-icon').className = 'ai-step-icon done';
       el.querySelector('.ai-step-icon').innerHTML = checkSVG();
       el.className = 'ai-step text-done';
     }
     function markStepActive(id, label) {
-      const el = document.getElementById(id);
-      if (!el) return;
+      const el = document.getElementById(id); if (!el) return;
       el.querySelector('.ai-step-icon').className = 'ai-step-icon active';
       el.querySelector('.ai-step-icon').innerHTML = dotSVG();
       el.className = 'ai-step text-active';
       if (label) el.lastChild.textContent = ' ' + label;
     }
 
-    /* ── Call backend AI ── */
     async function getAIRecommendation() {
       const data = await AI.analyze(
-        pending.name,
-        pending.price,
-        pending.category,
-        pending.reason,
-        pending.emotion
+        pending.name, pending.price, pending.category,
+        pending.reason, pending.emotion
       );
       return data.recommendation;
     }
 
-    /* ── Render result ── */
     function showResult(rec, isFallback) {
       const color = colorMap[rec.tag];
       const emoji = categoryEmoji[(pending.category || '').toLowerCase()] || '🛍️';
-
-      // Banner
       document.getElementById('result-banner').style.background = color;
-      document.getElementById('banner-icon').textContent = iconMap[rec.tag];
+      document.getElementById('banner-icon').textContent  = iconMap[rec.tag];
       document.getElementById('banner-title').textContent = rec.title;
       document.getElementById('banner-subtitle').textContent = rec.subtitle;
-
-      // Item info
       document.getElementById('item-emoji').textContent = emoji;
       document.getElementById('item-name-display').textContent = pending.name;
       document.getElementById('item-meta').textContent =
         `${fmt(parseFloat(pending.price), true)} · ${pending.category || 'General'} · Feeling: ${pending.emotion || 'Not specified'}`;
-
-      // Fallback notice
-      if (isFallback) {
-        document.getElementById('fallback-notice').style.display = 'block';
-      }
-
-      // Reasons
+      if (isFallback) document.getElementById('fallback-notice').style.display = 'block';
       document.getElementById('result-reasons').innerHTML = rec.reasons.map(r => `
         <div class="ai-reason">
           <div class="check-circle" style="background:${color};">
             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
-          </div>
-          ${r}
-        </div>`).join('');
-
-      // Advice
+          </div>${r}</div>`).join('');
       document.getElementById('result-advice').textContent =
         rec.advice || 'Consider your budget and financial goals before making this purchase.';
-
-      // Alternative
       document.getElementById('result-alternative').textContent =
         rec.alternative || 'Take 24 hours to think it over before deciding.';
-
-      // Show card
       document.getElementById('loading-card').style.display = 'none';
       document.getElementById('result-card').style.display  = 'block';
+      document.getElementById('scanner-wrap').style.display = 'block';
       sessionStorage.setItem('ic_rec_tag', rec.tag);
     }
 
-    /* ── Main ── */
     async function run() {
       let isFallback = false;
-
       const apiPromise = getAIRecommendation().catch(err => {
-        console.error('AI error:', err);
-        isFallback = true;
+        console.error('AI error:', err); isFallback = true;
         return getFallbackRecommendation();
       });
-
-      setTimeout(() => {
-        markStepDone('step-3');
-        markStepActive('step-4', 'Generating recommendation...');
-      }, 1400);
-
-      const [rec] = await Promise.all([
-        apiPromise,
-        new Promise(resolve => setTimeout(resolve, 2600))
-      ]);
-
+      setTimeout(() => { markStepDone('step-3'); markStepActive('step-4', 'Generating recommendation...'); }, 1400);
+      const [rec] = await Promise.all([apiPromise, new Promise(r => setTimeout(r, 2600))]);
       markStepDone('step-4');
       setTimeout(() => showResult(rec, isFallback), 400);
     }
 
     run();
 
-    /* ── Fallback ── */
     function getFallbackRecommendation() {
       if (pending.emotion === 'stressed' || pending.emotion === 'sad' || pending.emotion === 'bored') {
-        return {
-          tag: 'WAIT', title: 'THINK IT OVER FIRST',
+        return { tag: 'WAIT', title: 'THINK IT OVER FIRST',
           subtitle: 'Your current emotional state may be influencing this decision.',
           reasons: ['Emotional spending often leads to regret', 'Consider waiting 24 hours', 'Ask: need or want?'],
           advice: 'When we feel stressed or sad, shopping can feel like a quick fix — but the feeling fades and the expense stays. Give yourself a day before deciding.',
-          alternative: 'Write down why you want it. If you still feel the same tomorrow, reconsider then.',
-        };
+          alternative: 'Write down why you want it. If you still feel the same tomorrow, reconsider then.' };
       }
       if (pending.reason === 'impulse') {
-        return {
-          tag: 'AVOID', title: 'AVOID THIS ONE',
+        return { tag: 'AVOID', title: 'AVOID THIS ONE',
           subtitle: 'This purchase shows signs of impulsive buying.',
           reasons: ['Unplanned purchase', 'May already own something similar', 'Does not align with intentional spending'],
           advice: 'Impulse purchases feel exciting in the moment but often end up unused. Ask yourself when you will actually use this.',
-          alternative: 'Add it to a wishlist and revisit in 2 weeks. If it still matters, save up for it intentionally.',
-        };
+          alternative: 'Add it to a wishlist and revisit in 2 weeks. If it still matters, save up for it intentionally.' };
       }
-      return {
-        tag: 'BUY', title: 'LOOKS GOOD TO BUY',
+      return { tag: 'BUY', title: 'LOOKS GOOD TO BUY',
         subtitle: 'This appears to be a reasonable and intentional purchase.',
         reasons: ['No major red flags', 'Seems intentional', 'Within reasonable spending behavior'],
         advice: 'This purchase seems well thought out. Just make sure it fits within your monthly budget.',
-        alternative: 'Check if there is a discount or better deal available before purchasing.',
-      };
+        alternative: 'Check if there is a discount or better deal available before purchasing.' };
     }
 
-    /* ── Save decision ── */
+    /* ── KEY FIX: save to localStorage so dashboard + report see it ── */
+    function saveToLocalStorage(name, price, category, outcome, aiTag) {
+      const activity = JSON.parse(localStorage.getItem('ic_activity') || '[]');
+      activity.push({
+        id:       Date.now(),
+        name:     name,
+        price:    parseFloat(price),
+        category: category || 'Others',
+        outcome:  outcome,
+        ai_tag:   aiTag,
+        date:     new Date().toISOString(),
+      });
+      localStorage.setItem('ic_activity', JSON.stringify(activity));
+    }
+
     async function decide(outcome) {
+      const aiTag = sessionStorage.getItem('ic_rec_tag') || outcome;
+
+      /* 1 — save to backend */
       try {
         await Purchases.save({
           item_name:     pending.name,
@@ -434,11 +469,14 @@
           reason:        pending.reason   || '',
           emotion:       pending.emotion  || '',
           user_decision: outcome,
-          ai_tag:        sessionStorage.getItem('ic_rec_tag') || outcome,
+          ai_tag:        aiTag,
         });
       } catch (err) {
         console.error('Save purchase error:', err.message);
       }
+
+      /* 2 — save to localStorage so dashboard + spending-report show it */
+      saveToLocalStorage(pending.name, pending.price, pending.category, outcome, aiTag);
 
       sessionStorage.removeItem('ic_pending');
 
@@ -460,6 +498,99 @@
       }
 
       window.location.href = 'dashboard.html';
+    }
+
+    /* ── SCANNER LOGIC ── */
+    let scanBase64   = null;
+    let scanMimeType = null;
+    let lastScanData = null;
+
+    function toggleScanner() {
+      const card = document.getElementById('scanner-card');
+      const chev = document.getElementById('scanner-chevron');
+      const open = card.classList.toggle('open');
+      chev.textContent = open ? '▴' : '▾';
+    }
+
+    function handleScanImage(evt) {
+      const file = evt.target.files[0]; if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { alert('Image is too large. Please use an image under 5 MB.'); return; }
+      scanMimeType = file.type;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        scanBase64 = e.target.result.split(',')[1];
+        const preview = document.getElementById('scan-preview');
+        preview.src = e.target.result; preview.style.display = 'block';
+        document.getElementById('upload-zone').style.display = 'none';
+        document.getElementById('scan-btn').style.display    = 'block';
+        document.getElementById('scan-result-area').classList.remove('visible');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function runScan() {
+      if (!scanBase64) return;
+      document.getElementById('scan-btn').style.display = 'none';
+      document.getElementById('scan-loader').classList.add('visible');
+      document.getElementById('scan-result-area').classList.remove('visible');
+      try {
+        const token = localStorage.getItem('ic_token') || localStorage.getItem('token') || '';
+        const res = await fetch('https://impulsecheck-backend.onrender.com/api/ai/scan-product', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body:    JSON.stringify({ imageBase64: scanBase64, mimeType: scanMimeType }),
+        });
+        if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Scan failed'); }
+        const json = await res.json();
+        lastScanData = json.data;
+        renderScanResult(json.data);
+      } catch (err) {
+        console.error('[Scanner]', err.message);
+        alert('Image scan failed: ' + err.message + '\nPlease try again.');
+        document.getElementById('scan-btn').style.display = 'block';
+      } finally {
+        document.getElementById('scan-loader').classList.remove('visible');
+      }
+    }
+
+    function renderScanResult(d) {
+      document.getElementById('srb-name').textContent = d.productName || 'Unknown product';
+      document.getElementById('srb-meta').textContent =
+        (d.brand ? d.brand + ' · ' : '') + (d.category || '') + ' · ' + (d.needVsWant || '');
+      const riskColors = { Low: '#2eaa7e', Moderate: '#f0a830', High: '#e53935', 'Very High': '#e53935' };
+      const rc = riskColors[d.impulseRiskLabel] || '#888';
+      const banner = document.getElementById('srb-banner');
+      banner.style.background  = rc + '18';
+      banner.style.borderLeft  = `4px solid ${rc}`;
+      banner.style.borderRadius = 'var(--radius-sm)';
+      const catEmoji = { Electronics:'📱', Clothing:'👗', Food:'🍔', Beauty:'💄', Home:'🏠', Entertainment:'🎮', Sports:'⚽', Education:'📚', Other:'🛍️' };
+      document.getElementById('srb-icon').textContent      = catEmoji[d.category] || '🛍️';
+      document.getElementById('sic-category').textContent  = d.category || '—';
+      document.getElementById('sic-need').textContent      = d.needVsWant || '—';
+      document.getElementById('sic-score').textContent     = (d.impulseRiskScore ?? '—') + ' / 100';
+      const pr = d.estimatedPriceRange;
+      document.getElementById('sic-price').textContent = pr
+        ? '₱' + pr.min.toLocaleString() + ' – ₱' + pr.max.toLocaleString() : '—';
+      const score = d.impulseRiskScore || 0;
+      const fill  = document.getElementById('risk-bar-fill');
+      fill.style.width = score + '%'; fill.style.background = rc;
+      document.getElementById('sic-risk-label').textContent = d.impulseRiskLabel || '—';
+      document.getElementById('scan-message').textContent   = d.interventionMessage || '';
+      const altsEl = document.getElementById('scan-alts');
+      altsEl.innerHTML = '';
+      (d.alternatives || []).forEach(a => {
+        altsEl.innerHTML += `<div class="scan-alt-item"><span class="scan-alt-arrow">→</span>${a}</div>`;
+      });
+      document.getElementById('scan-result-area').classList.add('visible');
+    }
+
+    function autofillPurchase() {
+      if (!lastScanData) return;
+      sessionStorage.setItem('ic_scan_prefill', JSON.stringify({
+        name:     lastScanData.productName || '',
+        category: lastScanData.category    || '',
+      }));
+      window.location.href = 'record-purchase.html';
     }
   </script>
   <script src="notifications.js"></script>

@@ -122,7 +122,6 @@
       <div class="field">
         <label>Spending Categories</label>
         <div class="category-grid" id="cat-grid">
-          <!-- NO 'checked' class by default — all start unselected -->
           <div class="cat-chip" data-cat="Food">
             <span class="cat-dot" style="background:#2eaa7e"></span>Food
           </div>
@@ -184,16 +183,10 @@
     /* ── Currency symbol ── */
     document.getElementById('currency-sym').textContent = getCurrencySymbol();
 
-    /* ── Selected categories — start EMPTY, only restore if user previously saved ── */
+    /* ── Categories always start empty — user must select fresh every time ── */
     let selectedCategories = [];
 
-    /* Only restore saved categories if budget was already saved before */
-    const hasSavedBudget = localStorage.getItem('ic_budget');
-    if (hasSavedBudget) {
-      selectedCategories = JSON.parse(localStorage.getItem('ic_categories') || '[]');
-    }
-
-    /* ── Render chips ── */
+    /* ── Render chips (all unselected on load) ── */
     function renderChips() {
       document.querySelectorAll('.cat-chip').forEach(chip => {
         chip.classList.toggle('checked', selectedCategories.includes(chip.dataset.cat));
