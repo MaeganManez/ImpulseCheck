@@ -6,7 +6,7 @@ async function scanProduct(req, res) {
     const { imageBase64, mimeType } = req.body;
     if (!imageBase64) return res.status(400).json({ error: 'No image provided.' });
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-latest' });
     const prompt = `You are an AI spending intervention assistant for students. Analyze this product image and return ONLY a valid JSON object with no markdown, no explanation, no extra text — just the raw JSON.
 {
   "productName": "best guess of the product name",
