@@ -14,13 +14,11 @@
       max-width: 680px;
       margin: 0 auto;
     }
-
-    /* ── AVATAR ── */
     .avatar-zone {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-bottom: 28px;
+      margin-bottom: 32px;
     }
     .avatar-ring {
       position: relative;
@@ -45,68 +43,49 @@
     }
     .avatar-initials {
       font-size: 32px; font-weight: 800; color: #fff;
-      user-select: none; position: relative; z-index: 1;
+      user-select: none;
     }
-    .avatar-name  { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
-    .avatar-email { font-size: 13px; color: var(--text-muted); }
 
-    /* ── CARD HEADER ROW ── */
-    .card-header-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1.5px solid var(--border);
-    }
-    .card-header-row h2 {
-      font-size: 16px; font-weight: 700; color: var(--text); margin: 0;
-    }
-    .btn-edit {
-      display: flex; align-items: center; gap: 6px;
-      padding: 7px 16px; border-radius: 20px;
-      font-size: 13px; font-weight: 700; font-family: inherit;
-      border: 1.5px solid var(--border);
-      background: var(--input-bg); color: var(--text-muted);
-      cursor: pointer; transition: all 0.15s;
-    }
-    .btn-edit:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
-
-    /* ── FIELDS ── */
+    /* Fields — read-only style matches original inputs visually */
     .field { margin-bottom: 14px; }
-    .field label { font-size: 13px; font-weight: 600; color: var(--text); display: block; margin-bottom: 6px; }
-
-    /* Read-only display */
-    .field-value {
-      padding: 13px 14px;
-      font-size: 14px;
-      color: var(--text);
-      background: transparent;
-      border-radius: var(--radius-sm);
+    .field label {
+      font-size: 13px; font-weight: 600; color: var(--text);
+      display: block; margin-bottom: 6px;
     }
-
-    /* Editable input */
     .plain-input {
       width: 100%; background: var(--input-bg);
       border: 1.5px solid var(--input-border); border-radius: var(--radius-sm);
       padding: 13px 14px; font-size: 14px; color: var(--text);
       outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-      display: none;
+      font-family: inherit;
     }
-    .plain-input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,170,126,0.12); background: #fff; }
+    .plain-input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(46,170,126,0.12);
+      background: #fff;
+    }
+    .plain-input:read-only {
+      cursor: default;
+      color: var(--text);
+      background: var(--input-bg);
+    }
+    .plain-input:read-only:focus {
+      border-color: var(--input-border);
+      box-shadow: none;
+      background: var(--input-bg);
+    }
 
-    /* When editing mode is on */
-    .editing .field-value { display: none; }
-    .editing .plain-input { display: block; }
-
-    /* ── PREFERENCES ── */
+    /* Preferences */
     .pref-section-label {
       font-size: 15px; font-weight: 700; color: var(--text);
       margin: 22px 0 10px; padding-top: 16px;
       border-top: 1.5px solid var(--border);
     }
     .currency-pref-wrap { padding: 16px 0; border-bottom: 1px solid var(--border); }
-    .currency-pref-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 12px; }
+    .currency-pref-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 12px; gap: 12px;
+    }
     .currency-label { font-size: 14px; font-weight: 600; color: var(--text); }
     .currency-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
     .currency-selected-badge {
@@ -123,37 +102,38 @@
       outline: none; cursor: pointer; appearance: none; -webkit-appearance: none;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
       background-repeat: no-repeat; background-position: right 14px center;
-      transition: border-color 0.2s, box-shadow 0.2s;
     }
-    .currency-select:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(46,170,126,0.12); background-color: #fff; }
-
-    /* ── SAVE / CANCEL (hidden until editing) ── */
-    .profile-btns {
-      display: none;
-      gap: 12px;
-      margin-top: 24px;
+    .currency-select:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(46,170,126,0.12);
+      background-color: #fff;
+      outline: none;
     }
-    .profile-btns.visible { display: flex; }
-    .profile-btns .btn { flex: 1; padding: 13px; margin: 0; }
 
-    /* ── LOGOUT ── */
-    .logout-row {
-      margin-top: 20px;
+    /* Buttons */
+    .profile-btns { display: flex; gap: 12px; margin-top: 24px; }
+    .profile-btns .btn { flex: 1; margin: 0; padding: 13px; }
+
+    /* Edit button — small, top right of section */
+    .section-row {
+      display: flex; align-items: center;
+      justify-content: space-between;
       padding-top: 16px;
       border-top: 1.5px solid var(--border);
-      display: flex;
-      justify-content: center;
+      margin-bottom: 14px;
     }
-    .btn-logout-plain {
-      background: none; border: none;
-      color: var(--red); font-size: 14px; font-weight: 700;
-      font-family: inherit; cursor: pointer;
-      padding: 8px 16px; border-radius: var(--radius-sm);
-      transition: background 0.15s;
+    .section-row-label { font-size: 13px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+    .btn-edit-small {
+      display: flex; align-items: center; gap: 5px;
+      padding: 5px 13px; border-radius: 20px;
+      font-size: 12px; font-weight: 700; font-family: inherit;
+      border: 1.5px solid var(--border);
+      background: var(--input-bg); color: var(--text-muted);
+      cursor: pointer; transition: all 0.15s;
     }
-    .btn-logout-plain:hover { background: #fdecea; }
+    .btn-edit-small:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
 
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       .profile-card { padding: 24px 16px 24px; }
       .profile-btns { flex-direction: column; }
     }
@@ -174,40 +154,34 @@
   </header>
 
   <div class="main-content">
-    <div class="profile-card" id="profile-card">
+    <div class="profile-card">
 
-      <!-- Avatar -->
+      <!-- Avatar (initials only, no photo button) -->
       <div class="avatar-zone">
         <div class="avatar-ring">
           <div class="avatar-inner">
             <span class="avatar-initials" id="avatar-initials">M</span>
           </div>
         </div>
-        <div class="avatar-name"  id="display-name">—</div>
-        <div class="avatar-email" id="display-email">—</div>
       </div>
 
-      <!-- Header row with Edit button -->
-      <div class="card-header-row">
-        <h2>Profile Information</h2>
-        <button class="btn-edit" id="edit-btn" onclick="startEditing()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      <!-- Profile Info section with Edit button -->
+      <div class="section-row">
+        <span class="section-row-label">Profile</span>
+        <button class="btn-edit-small" id="edit-btn" onclick="startEditing()">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
           Edit
         </button>
       </div>
 
-      <!-- Full name -->
       <div class="field">
         <label>Full name</label>
-        <div class="field-value" id="val-name">—</div>
-        <input class="plain-input" type="text" id="profile-name" placeholder="Your full name" />
+        <input class="plain-input" type="text" id="profile-name" placeholder="Your full name" readonly />
       </div>
 
-      <!-- Email -->
       <div class="field">
         <label>Email address</label>
-        <div class="field-value" id="val-email">—</div>
-        <input class="plain-input" type="email" id="profile-email" placeholder="Your email address" />
+        <input class="plain-input" type="email" id="profile-email" placeholder="Your email address" readonly />
       </div>
 
       <div class="pref-section-label">Preferences</div>
@@ -252,15 +226,14 @@
         <label class="toggle"><input type="checkbox" id="pref-emotion" checked /><span class="toggle-slider"></span></label>
       </div>
 
-      <!-- Save + Cancel — only when editing -->
+      <!-- Buttons: Save+Cancel when editing, Logout always -->
       <div class="profile-btns" id="profile-btns">
         <button class="btn btn-primary" onclick="saveProfile()">Save changes</button>
         <button class="btn btn-outline" onclick="cancelEdit()">Cancel</button>
       </div>
 
-      <!-- Logout always visible -->
-      <div class="logout-row">
-        <button class="btn-logout-plain" onclick="logout()">Log out</button>
+      <div class="profile-btns" id="logout-row">
+        <button class="btn btn-outline-red" onclick="logout()">Log out</button>
       </div>
 
     </div>
@@ -270,7 +243,7 @@
 
   <script src="api.js"></script>
   <script>
-    let originalName = '', originalEmail = '', originalCurrency = '';
+    let origName = '', origEmail = '', origCurrency = '';
 
     function updateCurrencyBadge() {
       const sel = document.getElementById('pref-currency');
@@ -279,51 +252,54 @@
     }
 
     function startEditing() {
-      document.getElementById('profile-card').classList.add('editing');
-      document.getElementById('profile-btns').classList.add('visible');
-      document.getElementById('edit-btn').style.display = 'none';
+      document.getElementById('profile-name').removeAttribute('readonly');
+      document.getElementById('profile-email').removeAttribute('readonly');
       document.getElementById('profile-name').focus();
+      document.getElementById('profile-btns').style.display = 'flex';
+      document.getElementById('logout-row').style.display = 'none';
+      document.getElementById('edit-btn').style.display = 'none';
     }
 
     function cancelEdit() {
-      document.getElementById('profile-name').value  = originalName;
-      document.getElementById('profile-email').value = originalEmail;
+      document.getElementById('profile-name').value  = origName;
+      document.getElementById('profile-email').value = origEmail;
       const sel = document.getElementById('pref-currency');
       for (let i = 0; i < sel.options.length; i++) {
-        if (sel.options[i].value === originalCurrency) { sel.selectedIndex = i; break; }
+        if (sel.options[i].value === origCurrency) { sel.selectedIndex = i; break; }
       }
       updateCurrencyBadge();
       stopEditing();
     }
 
     function stopEditing() {
-      document.getElementById('profile-card').classList.remove('editing');
-      document.getElementById('profile-btns').classList.remove('visible');
+      document.getElementById('profile-name').setAttribute('readonly', true);
+      document.getElementById('profile-email').setAttribute('readonly', true);
+      document.getElementById('profile-btns').style.display = 'none';
+      document.getElementById('logout-row').style.display = 'flex';
       document.getElementById('edit-btn').style.display = 'flex';
     }
 
     window.addEventListener('DOMContentLoaded', () => {
       const user = getUser();
       if (user) {
-        originalName  = user.full_name || '';
-        originalEmail = user.email || '';
-        document.getElementById('profile-name').value  = originalName;
-        document.getElementById('profile-email').value = originalEmail;
-        document.getElementById('val-name').textContent  = originalName;
-        document.getElementById('val-email').textContent = originalEmail;
-        document.getElementById('display-name').textContent  = originalName;
-        document.getElementById('display-email').textContent = originalEmail;
-        const initial = (originalName || 'U').charAt(0).toUpperCase();
+        origName  = user.full_name || '';
+        origEmail = user.email || '';
+        document.getElementById('profile-name').value  = origName;
+        document.getElementById('profile-email').value = origEmail;
+        const initial = (origName || 'U').charAt(0).toUpperCase();
         document.getElementById('avatar-initials').textContent = initial;
         document.getElementById('topbar-avatar').textContent   = initial;
       }
-
-      originalCurrency = localStorage.getItem('ic_currency') || 'PHP';
+      origCurrency = localStorage.getItem('ic_currency') || 'PHP';
       const sel = document.getElementById('pref-currency');
       for (let i = 0; i < sel.options.length; i++) {
-        if (sel.options[i].value === originalCurrency) { sel.selectedIndex = i; break; }
+        if (sel.options[i].value === origCurrency) { sel.selectedIndex = i; break; }
       }
       updateCurrencyBadge();
+
+      // Initial state — hide save/cancel, show logout
+      document.getElementById('profile-btns').style.display = 'none';
+      document.getElementById('logout-row').style.display   = 'flex';
     });
 
     async function saveProfile() {
@@ -331,22 +307,14 @@
       const email = document.getElementById('profile-email').value.trim();
       if (!name || !email) { alert('Name and email cannot be empty.'); return; }
       const currency = document.getElementById('pref-currency').value;
-
       localStorage.setItem('ic_currency', currency);
       const user = getUser();
       if (user) { user.full_name = name; user.email = email; user.currency = currency; setUser(user); }
       try { await Profile.update(name, email, currency, null); } catch (e) { console.warn(e.message); }
-
-      // Update display values
-      document.getElementById('val-name').textContent   = name;
-      document.getElementById('val-email').textContent  = email;
-      document.getElementById('display-name').textContent  = name;
-      document.getElementById('display-email').textContent = email;
       const initial = name.charAt(0).toUpperCase();
       document.getElementById('avatar-initials').textContent = initial;
       document.getElementById('topbar-avatar').textContent   = initial;
-
-      originalName = name; originalEmail = email; originalCurrency = currency;
+      origName = name; origEmail = email; origCurrency = currency;
       stopEditing();
       showToast('✅ Profile saved!');
     }
