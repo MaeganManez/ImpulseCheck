@@ -9,7 +9,7 @@ const { sendReportEmail } = require('../config/mailer');
 async function sendReport(req, res) {
   try {
     const userId = req.user.id;
-    const period = req.body.period || 'monthly'; // 'weekly' or 'monthly'
+    const period = req.body.period || 'monthly';
 
     // ── Get user info ──
     const [userRows] = await db.query(
@@ -19,12 +19,13 @@ async function sendReport(req, res) {
     if (userRows.length === 0) return res.status(404).json({ error: 'User not found.' });
     const user = userRows[0];
 
-    // ── Date range ──
+    // ── Date range — PostgreSQL syntax ──
     let dateFilter;
     if (period === 'weekly') {
-      dateFilter = 'AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)';
+      dateFilter = `AND created_at >= NOW() - INTERVAL '7 days'`;
     } else {
-      dateFilter = 'AND MONTH(created_at) = MONTH(NOW()) AND YEAR(created_at) = YEAR(NOW())';
+      dateFilter = `AND EXTRACT(MONTH FROM created_at) = EXTRACT(MONTH FROM NOW())
+                    AND EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM NOW())`;
     }
 
     // ── Get purchases for period ──
