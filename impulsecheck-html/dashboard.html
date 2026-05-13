@@ -36,7 +36,7 @@
     .budget-box .b-amount { font-size: 30px; font-weight: 800; color: var(--text); }
     .budget-box .b-amount.green { color: var(--green); }
     .action-col { display: flex; flex-direction: column; gap: 8px; min-width: 190px; }
-    .action-col .btn { margin: 0; padding: 11px; font-size: 13px; }
+    .action-col .btn { margin: 0; padding: 11px; font-size: 13px; text-align: center; }
     .empty-state { padding: 40px 20px; text-align: center; }
     .empty-icon {
       width: 56px; height: 56px;
@@ -64,8 +64,8 @@
       .budget-row   { flex-direction: column; }
       .budget-boxes { flex-direction: row; }
       .budget-box .b-amount { font-size: 22px; }
-      .action-col   { flex-direction: row; min-width: unset; }
-      .action-col .btn { flex: 1; }
+      .action-col        { flex-direction: row; min-width: unset; align-items: stretch; }
+.action-col .btn   { flex: 1; text-align: center; display: flex; align-items: center; justify-content: center; }
     }
   </style>
 </head>

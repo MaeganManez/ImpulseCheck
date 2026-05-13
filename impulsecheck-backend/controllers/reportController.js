@@ -1,23 +1,18 @@
 const db                  = require('../config/db');
 const { sendReportEmail } = require('../config/mailer');
 
-/* ════════════════════════════════════════
-   POST /api/report/send
-   Generate report and send to user's email
-   Body: { period: 'weekly' | 'monthly' }
-════════════════════════════════════════ */
 async function sendReport(req, res) {
   try {
     const userId = req.user.id;
     const period = req.body.period || 'monthly';
 
     // ── Get user info ──
-    const [userRows] = await db.query(
-      'SELECT full_name, email, currency FROM users WHERE id = ?',
+    const userResult = await db.query(
+      'SELECT full_name, email, currency FROM users WHERE id = $1',
       [userId]
     );
-    if (userRows.length === 0) return res.status(404).json({ error: 'User not found.' });
-    const user = userRows[0];
+    if (userResult.rows.length === 0) return res.status(404).json({ error: 'User not found.' });
+    const user = userResult.rows[0];
 
     // ── Date range — PostgreSQL syntax ──
     let dateFilter;
@@ -29,13 +24,14 @@ async function sendReport(req, res) {
     }
 
     // ── Get purchases for period ──
-    const [purchases] = await db.query(
+    const purchasesResult = await db.query(
       `SELECT item_name, price, category, user_decision, created_at
        FROM purchases
-       WHERE user_id = ? ${dateFilter}
+       WHERE user_id = $1 ${dateFilter}
        ORDER BY created_at DESC`,
       [userId]
     );
+    const purchases = purchasesResult.rows;
 
     // ── Compute stats ──
     const totalSpent      = purchases.reduce((s, p) => s + parseFloat(p.price), 0);
