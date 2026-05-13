@@ -28,17 +28,16 @@ async function register(req, res) {
       });
     }
 
-    // ── Check duplicate email — allow re-registration if unverified ──
+    // Check duplicate email — allow re-registration if unverified
     const [emailCheck] = await db.query('SELECT id, is_verified FROM users WHERE email = ?', [email]);
     if (emailCheck.length > 0) {
       if (emailCheck[0].is_verified) {
         return res.status(409).json({ error: 'Email is already registered.' });
       }
-      // Delete unverified account so they can re-register
       await db.query('DELETE FROM users WHERE id = ?', [emailCheck[0].id]);
     }
 
-    // ── Check duplicate username — allow re-registration if unverified ──
+    // Check duplicate username — allow re-registration if unverified
     const [usernameCheck] = await db.query('SELECT id, is_verified FROM users WHERE username = ?', [username]);
     if (usernameCheck.length > 0) {
       if (usernameCheck[0].is_verified) {
@@ -50,14 +49,21 @@ async function register(req, res) {
     const salt          = await bcrypt.genSalt(10);
     const password_hash = await bcrypt.hash(password, salt);
 
+    // ── FIX: Use RETURNING id for PostgreSQL instead of insertId ──
     const [result] = await db.query(
       `INSERT INTO users
         (full_name, username, email, phone_number, age, date_of_birth, password_hash, is_verified)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 0)`,
+       VALUES (?, ?, ?, ?, ?, ?, ?, 0)
+       RETURNING id`,
       [full_name, username, email, phone_number || null, age || null, date_of_birth || null, password_hash]
     );
 
-    const userId = result.insertId;
+    const userId = result[0]?.id;
+
+    if (!userId) {
+      console.error('Register error: could not get userId after insert');
+      return res.status(500).json({ error: 'Server error. Please try again.' });
+    }
 
     await db.query('INSERT INTO user_preferences (user_id) VALUES (?)', [userId]);
 
