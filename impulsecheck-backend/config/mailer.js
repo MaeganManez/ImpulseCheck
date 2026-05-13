@@ -1,18 +1,26 @@
-require('dotenv').config();
-const nodemailer = require('nodemailer');
+// mailer.js — ImpulseCheck
+// Uses Brevo HTTP API (not SMTP — works on Render)
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.office365.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  tls: {
-    ciphers: 'SSLv3'
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
+const FROM_EMAIL    = 'manezmaegan06@gmail.com';
+const FROM_NAME     = 'ImpulseCheck';
+
+async function brevoSend(payload) {
+  const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'api-key': BREVO_API_KEY,
+    },
+    body: JSON.stringify(payload),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    console.error('[mailer] Brevo error:', data);
+    throw new Error(data.message || 'Failed to send email');
   }
-});
+  return data;
+}
 
 async function sendOTPEmail(toEmail, otp, type) {
   type = type || 'register';
@@ -20,11 +28,11 @@ async function sendOTPEmail(toEmail, otp, type) {
   const heading = type === 'register' ? 'Verify Your Account' : 'Reset Your Password';
   const bodyText = type === 'register' ? 'Thank you for signing up!' : 'Reset your password using the OTP below.';
 
-  await transporter.sendMail({
-    from: `ImpulseCheck <${process.env.EMAIL_USER}>`,
-    to: toEmail,
+  await brevoSend({
+    sender:      { name: FROM_NAME, email: FROM_EMAIL },
+    to:          [{ email: toEmail }],
     subject,
-    html: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 20px;">
+    htmlContent: `<div style="font-family:Arial,sans-serif;max-width:480px;margin:0 auto;padding:32px 20px;">
       <h1 style="color:#1a4a5c;">ImpulseCheck</h1>
       <h2>${heading}</h2>
       <p>${bodyText}</p>
@@ -33,8 +41,9 @@ async function sendOTPEmail(toEmail, otp, type) {
         <p style="color:#2eaa7e;font-size:36px;font-weight:800;letter-spacing:10px;margin:0;">${otp}</p>
       </div>
       <p style="font-size:12px;text-align:center;margin-top:16px;">This OTP expires in 10 minutes.</p>
-    </div>`
+    </div>`,
   });
+  console.log(`[mailer] OTP sent to ${toEmail}`);
 }
 
 async function sendReportEmail(toEmail, userName, reportData, period) {
@@ -48,11 +57,11 @@ async function sendReportEmail(toEmail, userName, reportData, period) {
     </tr>`
   ).join('');
 
-  await transporter.sendMail({
-    from: `ImpulseCheck <${process.env.EMAIL_USER}>`,
-    to: toEmail,
-    subject: `ImpulseCheck - Your ${period} Spending Report`,
-    html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;">
+  await brevoSend({
+    sender:      { name: FROM_NAME, email: FROM_EMAIL },
+    to:          [{ email: toEmail }],
+    subject:     `ImpulseCheck - Your ${period} Spending Report`,
+    htmlContent: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:32px;">
       <h1 style="color:#1a4a5c;">ImpulseCheck</h1>
       <h2>Hi ${userName}, here is your ${period} spending report!</h2>
       <p>Total Spent: ${sym}${Number(reportData.totalSpent).toLocaleString()}</p>
@@ -65,8 +74,9 @@ async function sendReportEmail(toEmail, userName, reportData, period) {
         </tr>
         ${rows}
       </table>
-    </div>`
+    </div>`,
   });
+  console.log(`[mailer] Report sent to ${toEmail}`);
 }
 
 module.exports = { sendOTPEmail, sendReportEmail };
