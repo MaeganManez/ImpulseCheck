@@ -17,26 +17,32 @@ async function scanProduct(req, res) {
   "interventionMessage": "a short empathetic message to help the student pause before buying"
 }`;
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{
-            parts: [
-              { text: prompt },
-              { inline_data: { mime_type: mimeType || 'image/jpeg', data: imageBase64 } }
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              { type: 'text', text: prompt },
+              { type: 'image_url', image_url: { url: `data:${mimeType || 'image/jpeg'};base64,${imageBase64}` } }
             ]
-          }]
-        })
-      }
-    );
+          }
+        ],
+        max_tokens: 1000,
+        temperature: 0.1,
+      })
+    });
 
     const json = await response.json();
-    if (!response.ok) throw new Error(json.error?.message || 'Gemini API error');
+    if (!response.ok) throw new Error(json.error?.message || 'Groq API error');
 
-    const raw     = json.candidates[0].content.parts[0].text.trim();
+    const raw     = json.choices[0].message.content.trim();
     const cleaned = raw.replace(/```json|```/g, '').trim();
     const parsed  = JSON.parse(cleaned);
     return res.status(200).json({ success: true, data: parsed });
