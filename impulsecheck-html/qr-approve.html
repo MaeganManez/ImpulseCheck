@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – Approve QR Login</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .auth-page {
+      min-height: 100vh; background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; padding: 32px 16px;
+    }
+    .auth-card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 40px 36px 36px;
+      width: 100%; max-width: 420px; text-align: center;
+    }
+    .qr-icon {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: var(--green-light); border: 2px solid var(--green);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 34px; margin: 0 auto 20px;
+    }
+    .qr-icon.danger { background: #fce4e4; border-color: #e53935; }
+    .qr-icon.success { background: var(--green-light); border-color: var(--green); }
+
+    h2 { font-size: 22px; font-weight: 800; color: var(--text); margin: 0 0 8px; }
+    .subtitle { font-size: 14px; color: var(--text-muted); margin: 0 0 24px; line-height: 1.6; }
+
+    .user-card {
+      background: var(--input-bg); border-radius: var(--radius-sm);
+      padding: 14px 16px; margin-bottom: 22px;
+      display: flex; align-items: center; gap: 12px; text-align: left;
+    }
+    .user-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--green); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; font-weight: 800; flex-shrink: 0;
+    }
+    .user-name  { font-size: 15px; font-weight: 700; color: var(--text); }
+    .user-email { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .btn-approve {
+      width: 100%; padding: 14px; border-radius: var(--radius-sm);
+      background: var(--green); color: #fff; border: none;
+      font-size: 15px; font-weight: 800; font-family: inherit;
+      cursor: pointer; transition: opacity 0.2s; margin-bottom: 10px;
+    }
+    .btn-approve:hover { opacity: 0.88; }
+    .btn-approve:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-cancel {
+      width: 100%; padding: 12px; border-radius: var(--radius-sm);
+      background: none; color: var(--text-muted);
+      border: 1.5px solid var(--border);
+      font-size: 14px; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-cancel:hover { border-color: #e53935; color: #e53935; }
+
+    .state-msg {
+      font-size: 14px; font-weight: 700; padding: 12px 16px;
+      border-radius: var(--radius-sm); margin-bottom: 16px;
+    }
+    .state-msg.success { background: var(--green-light); color: var(--green); border: 1px solid var(--green); }
+    .state-msg.error   { background: #fce4e4; color: #e53935; border: 1px solid #e53935; }
+  </style>
+</head>
+<body>
+  <div class="auth-page">
+    <img src="assets/logo.png" alt="" style="height:80px;width:auto;object-fit:contain;display:block;margin-bottom:24px;" />
+
+    <div class="auth-card" id="main-card">
+
+      <!-- NOT LOGGED IN STATE -->
+      <div id="state-not-logged-in" style="display:none;">
+        <div class="qr-icon danger">🔒</div>
+        <h2>Not Logged In</h2>
+        <p class="subtitle">You need to be logged in on this device to approve a QR login.</p>
+        <a href="login.html" class="btn btn-primary" style="display:block;text-decoration:none;">Go to Login</a>
+      </div>
+
+      <!-- READY TO APPROVE STATE -->
+      <div id="state-approve" style="display:none;">
+        <div class="qr-icon">📱</div>
+        <h2>Approve Login?</h2>
+        <p class="subtitle">Someone is trying to log in to ImpulseCheck on another device. Approve only if it's you.</p>
+        <div class="user-card">
+          <div class="user-avatar" id="approve-avatar">?</div>
+          <div>
+            <div class="user-name"  id="approve-name">—</div>
+            <div class="user-email" id="approve-email">—</div>
+          </div>
+        </div>
+        <button class="btn-approve" id="approve-btn" onclick="approveLogin()">✅ Yes, Approve This Login</button>
+        <button class="btn-cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
+      </div>
+
+      <!-- SUCCESS STATE -->
+      <div id="state-success" style="display:none;">
+        <div class="qr-icon success">✅</div>
+        <h2>Login Approved!</h2>
+        <p class="subtitle">The other device should now be logged in. You can close this page.</p>
+        <button class="btn-cancel" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+      </div>
+
+      <!-- ERROR STATE -->
+      <div id="state-error" style="display:none;">
+        <div class="qr-icon danger">❌</div>
+        <h2 id="error-title">Something went wrong</h2>
+        <p class="subtitle" id="error-msg">—</p>
+        <button class="btn-cancel" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const token   = localStorage.getItem('ic_token') || localStorage.getItem('token');
+    const user    = JSON.parse(localStorage.getItem('ic_user') || 'null');
+    const params  = new URLSearchParams(window.location.search);
+    const sessionId = params.get('session');
+
+    function showState(name) {
+      ['not-logged-in','approve','success','error'].forEach(s => {
+        document.getElementById('state-' + s).style.display = s === name ? 'block' : 'none';
+      });
+    }
+
+    if (!token || !user) {
+      showState('not-logged-in');
+    } else if (!sessionId) {
+      showState('error');
+      document.getElementById('error-title').textContent = 'Invalid QR Code';
+      document.getElementById('error-msg').textContent   = 'This QR link is missing required data. Please scan a fresh QR code.';
+    } else {
+      // Show approve state with user info
+      document.getElementById('approve-avatar').textContent = (user.full_name || user.email || '?')[0].toUpperCase();
+      document.getElementById('approve-name').textContent   = user.full_name || 'Unknown';
+      document.getElementById('approve-email').textContent  = user.email || '';
+      showState('approve');
+    }
+
+    async function approveLogin() {
+      const btn = document.getElementById('approve-btn');
+      btn.disabled = true;
+      btn.textContent = 'Approving…';
+      try {
+        const res = await fetch('https://impulsecheck-backend.onrender.com/api/qrauth/approve', {
+          method:  'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ sessionId }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showState('error');
+          document.getElementById('error-title').textContent = 'Approval Failed';
+          document.getElementById('error-msg').textContent   = data.error || 'Something went wrong.';
+          return;
+        }
+        showState('success');
+      } catch (err) {
+        showState('error');
+        document.getElementById('error-title').textContent = 'Connection Error';
+        document.getElementById('error-msg').textContent   = 'Could not reach the server. Please try again.';
+      }
+    }
+  </script>
+</body>
+</html>

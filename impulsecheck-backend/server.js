@@ -117,6 +117,7 @@ app.use('/api/purchases',     require('./routes/purchases'));
 app.use('/api/profile',       require('./routes/profile'));
 app.use('/api/notifications', require('./routes/notifications'));
 app.use('/api/report',        require('./routes/report'));
+app.use('/api/qrauth',        require('./routes/qrauth'));
 
 /* ── HEALTH CHECK ── */
 app.get('/', (req, res) => res.json({ status: 'running', app: 'ImpulseCheck API', version: '2.0.0' }));
