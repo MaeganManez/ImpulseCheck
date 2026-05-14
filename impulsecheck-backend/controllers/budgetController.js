@@ -22,7 +22,7 @@ async function saveBudget(req, res) {
 
     // Check if budget already exists for this month/year
     const [existing] = await db.query(
-      'SELECT id FROM budgets WHERE user_id = ? AND month = ? AND year = ?',
+      'SELECT id FROM budgets WHERE user_id = $1 AND month = $2 AND year = $3',
       [userId, month, year]
     );
 
@@ -32,26 +32,44 @@ async function saveBudget(req, res) {
       // UPDATE existing budget
       budgetId = existing[0].id;
       await db.query(
-        'UPDATE budgets SET amount = ?, period = ? WHERE id = ?',
+        'UPDATE budgets SET amount = $1, period = $2 WHERE id = $3',
         [amount, period || 'monthly', budgetId]
       );
-      // Delete old categories
-      await db.query('DELETE FROM budget_categories WHERE budget_id = ?', [budgetId]);
+      await db.query('DELETE FROM budget_categories WHERE budget_id = $1', [budgetId]);
     } else {
       // INSERT new budget
       const [result] = await db.query(
-        'INSERT INTO budgets (user_id, amount, period, month, year) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO budgets (user_id, amount, period, month, year) VALUES ($1, $2, $3, $4, $5) RETURNING id',
         [userId, amount, period || 'monthly', month, year]
       );
-      budgetId = result.insertId;
+      budgetId = result[0].id;
     }
 
-    // Insert new categories
-    const catValues = categories.map(cat => [budgetId, cat]);
-    await db.query(
-      'INSERT INTO budget_categories (budget_id, category_name) VALUES ?',
-      [catValues]
-    );
+    // Insert categories one by one (PostgreSQL doesn't support VALUES ?)
+    for (const cat of categories) {
+      await db.query(
+        'INSERT INTO budget_categories (budget_id, category_name) VALUES ($1, $2)',
+        [budgetId, cat]
+      );
+    }
+
+    // ── Budget set notification ──
+    try {
+      const sym = '₱';
+      const amt = parseFloat(amount).toLocaleString();
+      const isUpdate = existing.length > 0;
+      await db.query(
+        `INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, $4)`,
+        [
+          userId,
+          isUpdate ? '💰 Budget Updated!' : '💰 Budget Set!',
+          `Your monthly budget has been ${isUpdate ? 'updated' : 'set'} to ${sym}${amt}.`,
+          'budget',
+        ]
+      );
+    } catch (notifErr) {
+      console.warn('Notification error (non-fatal):', notifErr.message);
+    }
 
     return res.status(200).json({
       message: 'Budget saved successfully.',
@@ -77,11 +95,11 @@ async function getBudget(req, res) {
 
     const [rows] = await db.query(
       `SELECT b.id, b.amount, b.period, b.month, b.year,
-              GROUP_CONCAT(bc.category_name) AS categories
+              STRING_AGG(bc.category_name, ',') AS categories
        FROM budgets b
        LEFT JOIN budget_categories bc ON bc.budget_id = b.id
-       WHERE b.user_id = ? AND b.month = ? AND b.year = ?
-       GROUP BY b.id`,
+       WHERE b.user_id = $1 AND b.month = $2 AND b.year = $3
+       GROUP BY b.id, b.amount, b.period, b.month, b.year`,
       [userId, month, year]
     );
 

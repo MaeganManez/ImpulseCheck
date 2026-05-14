@@ -23,7 +23,8 @@ async function savePurchase(req, res) {
       `INSERT INTO purchases
         (user_id, item_name, price, category, reason, emotion,
          ai_tag, ai_title, ai_subtitle, ai_reasons, user_decision)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       RETURNING id`,
       [
         userId, item_name, price, category || 'Others',
         reason || null, emotion || null,
@@ -35,9 +36,79 @@ async function savePurchase(req, res) {
       ]
     );
 
+    const purchaseId = result[0]?.id;
+
+    // ── Notifications based on decision ──
+    try {
+      const sym = '₱';
+      const amt = parseFloat(price).toLocaleString();
+
+      let notifTitle, notifMsg, notifType;
+
+      if (user_decision === 'AVOID') {
+        notifTitle = '🚫 Purchase Avoided!';
+        notifMsg   = `Great choice! You saved ${sym}${amt} by skipping "${item_name}".`;
+        notifType  = 'avoid';
+      } else if (user_decision === 'WAIT') {
+        notifTitle = '⏳ Purchase Delayed!';
+        notifMsg   = `Good thinking! You delayed buying "${item_name}" for ${sym}${amt}.`;
+        notifType  = 'wait';
+      } else if (user_decision === 'BUY') {
+        notifTitle = '✅ Purchase Recorded!';
+        notifMsg   = `"${item_name}" for ${sym}${amt} has been added to your history.`;
+        notifType  = 'buy';
+      }
+
+      if (notifTitle) {
+        await db.query(
+          `INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, $4)`,
+          [userId, notifTitle, notifMsg, notifType]
+        );
+      }
+
+      // ── Low budget warning ──
+      const now   = new Date();
+      const month = now.getMonth() + 1;
+      const year  = now.getFullYear();
+
+      const [budgetRows] = await db.query(
+        `SELECT b.amount,
+                COALESCE(SUM(p.price), 0) AS spent
+         FROM budgets b
+         LEFT JOIN purchases p
+           ON p.user_id = b.user_id
+          AND EXTRACT(MONTH FROM p.created_at) = $2
+          AND EXTRACT(YEAR  FROM p.created_at) = $3
+         WHERE b.user_id = $1 AND b.month = $2 AND b.year = $3
+         GROUP BY b.amount`,
+        [userId, month, year]
+      );
+
+      if (budgetRows.length > 0) {
+        const budget    = parseFloat(budgetRows[0].amount);
+        const spent     = parseFloat(budgetRows[0].spent);
+        const remaining = budget - spent;
+        const pct       = remaining / budget;
+
+        if (pct <= 0) {
+          await db.query(
+            `INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, $4)`,
+            [userId, '⚠️ Budget Exceeded!', `You've gone over your monthly budget of ${sym}${budget.toLocaleString()}.`, 'budget']
+          );
+        } else if (pct <= 0.2) {
+          await db.query(
+            `INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, $4)`,
+            [userId, '⚠️ Low Budget Warning!', `Only ${sym}${remaining.toLocaleString()} remaining from your ${sym}${budget.toLocaleString()} budget.`, 'budget']
+          );
+        }
+      }
+    } catch (notifErr) {
+      console.warn('Notification error (non-fatal):', notifErr.message);
+    }
+
     return res.status(201).json({
       message:    'Purchase saved.',
-      purchaseId: result.insertId,
+      purchaseId,
     });
 
   } catch (err) {
@@ -59,12 +130,11 @@ async function getPurchases(req, res) {
               ai_tag, ai_title, ai_subtitle, ai_reasons,
               user_decision, created_at
        FROM purchases
-       WHERE user_id = ?
+       WHERE user_id = $1
        ORDER BY created_at DESC`,
       [userId]
     );
 
-    // Parse ai_reasons JSON
     const purchases = rows.map(p => ({
       ...p,
       ai_reasons: p.ai_reasons
@@ -88,9 +158,8 @@ async function deletePurchase(req, res) {
     const userId     = req.user.id;
     const purchaseId = req.params.id;
 
-    // Make sure it belongs to this user
     const [rows] = await db.query(
-      'SELECT id FROM purchases WHERE id = ? AND user_id = ?',
+      'SELECT id FROM purchases WHERE id = $1 AND user_id = $2',
       [purchaseId, userId]
     );
 
@@ -98,7 +167,7 @@ async function deletePurchase(req, res) {
       return res.status(404).json({ error: 'Purchase not found.' });
     }
 
-    await db.query('DELETE FROM purchases WHERE id = ?', [purchaseId]);
+    await db.query('DELETE FROM purchases WHERE id = $1', [purchaseId]);
 
     return res.status(200).json({ message: 'Purchase deleted.' });
 
@@ -115,7 +184,7 @@ async function deletePurchase(req, res) {
 async function clearAllPurchases(req, res) {
   try {
     const userId = req.user.id;
-    await db.query('DELETE FROM purchases WHERE user_id = ?', [userId]);
+    await db.query('DELETE FROM purchases WHERE user_id = $1', [userId]);
     return res.status(200).json({ message: 'All purchases cleared.' });
   } catch (err) {
     console.error('ClearAll error:', err);
@@ -139,12 +208,12 @@ async function getReport(req, res) {
          COUNT(*) AS total_count,
          COALESCE(SUM(price), 0) AS total_spent,
          COALESCE(SUM(CASE WHEN user_decision IN ('AVOID','WAIT') THEN price ELSE 0 END), 0) AS impulsive_amount,
-         COUNT(CASE  WHEN user_decision IN ('AVOID','WAIT') THEN 1 END) AS impulsive_count,
+         COUNT(CASE WHEN user_decision IN ('AVOID','WAIT') THEN 1 END) AS impulsive_count,
          COALESCE(SUM(CASE WHEN user_decision = 'AVOID' THEN price ELSE 0 END), 0) AS saved_amount
        FROM purchases
-       WHERE user_id = ?
-         AND MONTH(created_at) = ?
-         AND YEAR(created_at)  = ?`,
+       WHERE user_id = $1
+         AND EXTRACT(MONTH FROM created_at) = $2
+         AND EXTRACT(YEAR  FROM created_at) = $3`,
       [userId, month, year]
     );
 
