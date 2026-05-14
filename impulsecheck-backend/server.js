@@ -46,7 +46,8 @@ passport.use(new GoogleStrategy({
   callbackURL:  'https://impulsecheck-backend.onrender.com/auth/google/callback',
 }, async (accessToken, refreshToken, profile, done) => {
   try {
-    const email     = profile.emails[0].value;
+    const email     = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
+    if (!email) return done(new Error('No email returned from Google'), null);
     const full_name = profile.displayName;
     const google_id = profile.id;
 
