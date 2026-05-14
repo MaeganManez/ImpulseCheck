@@ -312,7 +312,6 @@
 
   <div class="toast" id="toast"></div>
 
-  <!-- QRCode.js CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="api.js"></script>
   <script>
@@ -325,10 +324,17 @@
       document.getElementById('currency-badge').textContent = opt.dataset.symbol + ' ' + opt.value;
     }
 
-    function saveEmotionPref() {
-      const on = document.getElementById('pref-emotion').checked;
-      localStorage.setItem('ic_default_emotion', on ? 'neutral' : '');
-      showToast(on ? '✅ Emotion auto-fill enabled' : 'Emotion auto-fill disabled');
+    async function saveEmotionPref() {
+      const on  = document.getElementById('pref-emotion').checked;
+      const val = on ? 'neutral' : '';
+      localStorage.setItem('ic_default_emotion', val);
+      try {
+        await Profile.savePreferences(
+          localStorage.getItem('ic_currency') || 'PHP',
+          on, val
+        );
+      } catch(e) { console.warn('pref save error:', e); }
+      showToast(on ? 'Emotion auto-fill enabled' : 'Emotion auto-fill disabled');
     }
 
     function startEditing() {
@@ -376,25 +382,19 @@
 
         currentQRUrl = data.qrUrl;
 
-        // Draw QR on canvas using QRCode.js
-        const canvas = document.getElementById('qr-canvas');
-        canvas.innerHTML = '';
-
-        // Use a temp div then copy to canvas
         const tempDiv = document.createElement('div');
         tempDiv.style.display = 'none';
         document.body.appendChild(tempDiv);
 
         new QRCode(tempDiv, {
-          text:          currentQRUrl,
-          width:         200,
-          height:        200,
-          colorDark:     '#1a4a5c',
-          colorLight:    '#ffffff',
-          correctLevel:  QRCode.CorrectLevel.H,
+          text:         currentQRUrl,
+          width:        200,
+          height:       200,
+          colorDark:    '#1a4a5c',
+          colorLight:   '#ffffff',
+          correctLevel: QRCode.CorrectLevel.H,
         });
 
-        // QRCode.js creates an img inside tempDiv
         setTimeout(() => {
           const img = tempDiv.querySelector('img');
           if (img) {
@@ -424,81 +424,70 @@
     }
 
     function downloadQR() {
-  const qrCanvas = document.getElementById('qr-canvas');
-  const user = getUser();
-  const name = user ? user.full_name : 'My Login QR';
+      const qrCanvas = document.getElementById('qr-canvas');
+      const user = getUser();
+      const name = user ? user.full_name : 'My Login QR';
 
-  // Create a styled card canvas
-  const card = document.createElement('canvas');
-  card.width  = 400;
-  card.height = 500;
-  const ctx = card.getContext('2d');
+      const card = document.createElement('canvas');
+      card.width  = 400;
+      card.height = 500;
+      const ctx = card.getContext('2d');
 
-  // Background
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, 400, 500);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, 400, 500);
 
-  // Top banner
-  const grad = ctx.createLinearGradient(0, 0, 400, 100);
-  grad.addColorStop(0, '#1a4a5c');
-  grad.addColorStop(1, '#0f6e56');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, 400, 100);
+      const grad = ctx.createLinearGradient(0, 0, 400, 100);
+      grad.addColorStop(0, '#1a4a5c');
+      grad.addColorStop(1, '#0f6e56');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 400, 100);
 
-  // App name
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 28px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('ImpulseCheck', 200, 45);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 28px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('ImpulseCheck', 200, 45);
 
-  // Tagline
-  ctx.font = '14px sans-serif';
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.fillText('AI-Powered Spending Intervention', 200, 72);
+      ctx.font = '14px sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.fillText('AI-Powered Spending Intervention', 200, 72);
 
-  // QR code
-  ctx.drawImage(qrCanvas, 100, 115, 200, 200);
+      ctx.drawImage(qrCanvas, 100, 115, 200, 200);
 
-  // Border around QR
-  ctx.strokeStyle = '#e2e8f0';
-  ctx.lineWidth = 1.5;
-  ctx.strokeRect(100, 115, 200, 200);
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(100, 115, 200, 200);
 
-  // User name
-  ctx.fillStyle = '#1a202c';
-  ctx.font = 'bold 18px sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(name, 200, 345);
+      ctx.fillStyle = '#1a202c';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(name, 200, 345);
 
-  // Divider
-  ctx.strokeStyle = '#e2e8f0';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(40, 362);
-  ctx.lineTo(360, 362);
-  ctx.stroke();
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(40, 362);
+      ctx.lineTo(360, 362);
+      ctx.stroke();
 
-  // Instructions
-  ctx.fillStyle = '#718096';
-  ctx.font = '13px sans-serif';
-  ctx.fillText('Scan or upload this QR on the login page', 200, 388);
-  ctx.fillText('to log in instantly — no password needed', 200, 410);
+      ctx.fillStyle = '#718096';
+      ctx.font = '13px sans-serif';
+      ctx.fillText('Scan or upload this QR on the login page', 200, 388);
+      ctx.fillText('to log in instantly — no password needed', 200, 410);
 
-  // Bottom accent
-  ctx.fillStyle = '#2eaa7e';
-  ctx.fillRect(0, 470, 400, 30);
-  ctx.fillStyle = '#ffffff';
-  ctx.font = 'bold 12px sans-serif';
-  ctx.fillText('cozy-bienenstitch-7eef5a.netlify.app', 200, 490);
+      ctx.fillStyle = '#2eaa7e';
+      ctx.fillRect(0, 470, 400, 30);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('cozy-bienenstitch-7eef5a.netlify.app', 200, 490);
 
-  const link = document.createElement('a');
-  link.download = 'impulsecheck-login-qr.png';
-  link.href = card.toDataURL('image/png');
-  link.click();
-  showToast('✅ QR code saved!');
-}
+      const link = document.createElement('a');
+      link.download = 'impulsecheck-login-qr.png';
+      link.href = card.toDataURL('image/png');
+      link.click();
+      showToast('QR code saved!');
+    }
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       const user = getUser();
       if (user) {
         origName  = user.full_name || '';
@@ -509,6 +498,7 @@
         document.getElementById('avatar-initials').textContent = initial;
         document.getElementById('topbar-avatar').textContent   = initial;
       }
+
       origCurrency = localStorage.getItem('ic_currency') || 'PHP';
       const sel = document.getElementById('pref-currency');
       for (let i = 0; i < sel.options.length; i++) {
@@ -516,8 +506,24 @@
       }
       updateCurrencyBadge();
 
-      const savedEmotion = localStorage.getItem('ic_default_emotion');
-      document.getElementById('pref-emotion').checked = savedEmotion === 'neutral';
+      // Load emotion preference from DATABASE (persists across logout)
+      try {
+        const prefRes = await apiFetch('/profile/preferences');
+        if (prefRes && prefRes.preferences) {
+          const dbEmotion = prefRes.preferences.default_emotion;
+          const isOn = !!dbEmotion && dbEmotion !== '';
+          document.getElementById('pref-emotion').checked = isOn;
+          localStorage.setItem('ic_default_emotion', isOn ? 'neutral' : '');
+        } else {
+          // fallback to localStorage
+          const savedEmotion = localStorage.getItem('ic_default_emotion');
+          document.getElementById('pref-emotion').checked = savedEmotion === 'neutral';
+        }
+      } catch(e) {
+        // fallback to localStorage
+        const savedEmotion = localStorage.getItem('ic_default_emotion');
+        document.getElementById('pref-emotion').checked = savedEmotion === 'neutral';
+      }
 
       document.getElementById('profile-btns').style.display = 'none';
       document.getElementById('logout-row').style.display   = 'flex';
@@ -539,7 +545,7 @@
       document.getElementById('topbar-avatar').textContent   = initial;
       origName = name; origEmail = email; origCurrency = currency;
       stopEditing();
-      showToast('✅ Profile saved!');
+      showToast('Profile saved!');
     }
 
     function logout() {
