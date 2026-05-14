@@ -357,6 +357,7 @@
     </div>
   </div>
 
+  <script src="api.js"></script>
   <script src="currency.js"></script>
   <script>
     // ── Build category dropdown ──
@@ -496,7 +497,7 @@
     }
 
     // ── Analyze ──
-    function analyzePurchase() {
+    async function analyzePurchase() {
       const name     = document.getElementById('item-name').value.trim();
       const price    = parseFloat(document.getElementById('item-price').value);
       const category = document.getElementById('item-category').value;
@@ -514,8 +515,36 @@
         banner.style.display = 'block';
         return;
       }
-      banner.style.display = 'none';
 
+      // ── Budget check ──
+      try {
+        const budgetData = await Budget.get();
+        if (budgetData && budgetData.budget) {
+          const budgetAmount = parseFloat(budgetData.budget.amount) || 0;
+          const purchaseData = await Purchases.getAll();
+          const now = new Date();
+          const thisMonthSpent = purchaseData.purchases
+            .filter(p => {
+              const d = new Date(p.created_at);
+              return d.getMonth() === now.getMonth() &&
+                     d.getFullYear() === now.getFullYear() &&
+                     p.user_decision === 'BUY';
+            })
+            .reduce((s, p) => s + parseFloat(p.price), 0);
+          const remaining = budgetAmount - thisMonthSpent;
+          if (remaining <= 0) {
+            banner.innerHTML = '⚠️ Your budget is fully used up! <a href="set-budget.html" style="color:#e53935;font-weight:700;">Set a new budget</a> before recording a purchase.';
+            banner.style.display = 'block';
+            banner.style.background = '#fce4e4';
+            banner.style.color = '#e53935';
+            return;
+          }
+        }
+      } catch(e) {
+        console.warn('Budget check error:', e.message);
+      }
+
+      banner.style.display = 'none';
       sessionStorage.setItem('ic_pending', JSON.stringify({ name, price, category, reason, emotion }));
       window.location.href = 'ai-recommendation.html';
     }
