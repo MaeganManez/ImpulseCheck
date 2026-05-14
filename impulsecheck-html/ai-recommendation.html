@@ -580,6 +580,7 @@
         });
       } catch (err) {
         console.error('Save purchase error:', err.message);
+    alert('⚠️ Could not save to database: ' + err.message);
       }
       saveToLocalStorage(pending.name, pending.price, pending.category, outcome, aiTag);
       sessionStorage.removeItem('ic_pending');

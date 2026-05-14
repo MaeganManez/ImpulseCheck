@@ -10,7 +10,7 @@ const API_BASE = 'https://impulsecheck-backend.onrender.com/api';
 /* ════════════════════════════════════════
    TOKEN HELPERS
 ════════════════════════════════════════ */
-function getToken()        { return localStorage.getItem('ic_token'); }
+function getToken()        { return localStorage.getItem('ic_token') || localStorage.getItem('token'); }
 function setToken(token)   { localStorage.setItem('ic_token', token); }
 function removeToken()     { localStorage.removeItem('ic_token'); }
 function setUser(user)     { localStorage.setItem('ic_user', JSON.stringify(user)); }
