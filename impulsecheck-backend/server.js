@@ -64,7 +64,7 @@ passport.use(new GoogleStrategy({
       // Create new user
       const [newRows] = await db.query(
         `INSERT INTO users (full_name, username, email, password_hash, is_verified, currency)
-         VALUES ($1, $2, $3, $4, true, 'PHP')
+         VALUES ($1, $2, $3, $4, 1, 'PHP')
          RETURNING id, full_name, email, currency`,
         [full_name, email.split('@')[0], email, 'GOOGLE_OAUTH_' + google_id]
       );
