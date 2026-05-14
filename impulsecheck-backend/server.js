@@ -51,24 +51,24 @@ passport.use(new GoogleStrategy({
     const full_name = profile.displayName;
     const google_id = profile.id;
 
-    // Check if user exists
-    const existing = await db.query(
+    // Check if user exists — destructure [rows] from db.query
+    const [existingRows] = await db.query(
       'SELECT id, full_name, email, currency FROM users WHERE email = $1',
       [email]
     );
 
     let user;
-    if (existing.rows.length > 0) {
-      user = existing.rows[0];
+    if (existingRows.length > 0) {
+      user = existingRows[0];
     } else {
-      // Create new user (no password needed for Google users)
-      const result = await db.query(
+      // Create new user
+      const [newRows] = await db.query(
         `INSERT INTO users (full_name, username, email, password_hash, is_verified, currency)
          VALUES ($1, $2, $3, $4, true, 'PHP')
          RETURNING id, full_name, email, currency`,
         [full_name, email.split('@')[0], email, 'GOOGLE_OAUTH_' + google_id]
       );
-      user = result.rows[0];
+      user = newRows[0];
 
       // Create preferences + welcome notification
       await db.query('INSERT INTO user_preferences (user_id) VALUES ($1)', [user.id]);
@@ -98,7 +98,6 @@ app.get('/auth/google/callback',
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    // Redirect to frontend with token + user info
     const params = new URLSearchParams({
       token,
       id:        user.id,
