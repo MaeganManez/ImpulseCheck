@@ -6,7 +6,6 @@
   <title>ImpulseCheck – Recommendation</title>
   <link rel="stylesheet" href="shared.css" />
   <style>
-    /* ── LOADING CARD ── */
     .loading-card {
       background: var(--card);
       border-radius: var(--radius);
@@ -40,17 +39,9 @@
       0%   { transform: scale(0.95); opacity: 1; }
       100% { transform: scale(1.25); opacity: 0; }
     }
-    .loading-card-top h2 {
-      font-size: 20px; font-weight: 800;
-      color: #fff; margin: 0 0 6px;
-    }
-    .loading-card-top p {
-      font-size: 13px; color: rgba(255,255,255,0.75);
-      margin: 0; line-height: 1.5;
-    }
-    .loading-card-body {
-      padding: 24px 28px 28px;
-    }
+    .loading-card-top h2 { font-size: 20px; font-weight: 800; color: #fff; margin: 0 0 6px; }
+    .loading-card-top p  { font-size: 13px; color: rgba(255,255,255,0.75); margin: 0; line-height: 1.5; }
+    .loading-card-body { padding: 24px 28px 28px; }
     .loading-item-preview {
       display: flex; align-items: center; gap: 12px;
       background: var(--input-bg);
@@ -61,7 +52,6 @@
     .loading-item-preview .lip-emoji { font-size: 22px; flex-shrink: 0; }
     .loading-item-preview .lip-name  { font-size: 15px; font-weight: 700; color: var(--text); }
     .loading-item-preview .lip-meta  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-
     .steps-list { display: flex; flex-direction: column; gap: 12px; }
     .step-row {
       display: flex; align-items: center; gap: 12px;
@@ -76,16 +66,12 @@
       flex-shrink: 0; transition: background 0.3s;
     }
     .step-icon.pending { background: var(--input-bg); }
-    .step-icon.active  {
-      background: var(--green-light);
-      border: 2px solid var(--green);
-    }
+    .step-icon.active  { background: var(--green-light); border: 2px solid var(--green); }
     .step-icon.done    { background: var(--green); }
     .step-icon.active svg  { stroke: var(--green); }
     .step-icon.done svg    { stroke: #fff; }
     .step-icon.pending svg { stroke: var(--text-light); }
 
-    /* ── RESULT CARD ── */
     .ai-result-card {
       background: var(--card);
       border-radius: var(--radius);
@@ -95,10 +81,7 @@
       margin: 0 auto;
       display: none;
     }
-    .ai-result-banner {
-      padding: 20px 28px 18px;
-      display: flex; align-items: center; gap: 16px;
-    }
+    .ai-result-banner { padding: 20px 28px 18px; display: flex; align-items: center; gap: 16px; }
     .ai-banner-icon {
       width: 48px; height: 48px; border-radius: 50%;
       background: rgba(255,255,255,0.25);
@@ -122,10 +105,7 @@
       color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px;
     }
     .ai-reasons { display: flex; flex-direction: column; gap: 8px; }
-    .ai-reason {
-      display: flex; align-items: flex-start; gap: 10px;
-      font-size: 14px; font-weight: 500; color: var(--text);
-    }
+    .ai-reason { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; font-weight: 500; color: var(--text); }
     .check-circle {
       width: 20px; height: 20px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
@@ -153,7 +133,6 @@
       padding: 4px 10px; font-size: 11px; font-weight: 700; margin-bottom: 16px;
     }
 
-    /* ── SCANNER SECTION ── */
     .scanner-wrap { max-width: 680px; margin: 32px auto 0; }
     .scanner-toggle {
       width: 100%; background: var(--card);
@@ -188,9 +167,7 @@
       position: relative; transition: border-color 0.2s, background 0.2s; margin-bottom: 14px;
     }
     .upload-zone:hover { border-color: var(--green); background: rgba(46,170,126,0.04); }
-    .upload-zone input[type="file"] {
-      position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-    }
+    .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
     .upload-zone-icon { font-size: 32px; margin-bottom: 8px; }
     .upload-zone p { font-size: 13px; color: var(--text-muted); margin: 0; }
     .upload-zone p strong { color: var(--green); }
@@ -201,16 +178,11 @@
     }
     .scan-result-area { display: none; margin-top: 18px; }
     .scan-result-area.visible { display: block; }
-    .scan-result-banner {
-      border-radius: var(--radius-sm); padding: 14px 16px;
-      margin-bottom: 14px; display: flex; align-items: center; gap: 12px;
-    }
+    .scan-result-banner { border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 14px; display: flex; align-items: center; gap: 12px; }
     .scan-result-banner .srb-icon { font-size: 28px; flex-shrink: 0; }
     .scan-result-banner .srb-name { font-size: 16px; font-weight: 800; color: var(--text); margin: 0 0 2px; }
     .scan-result-banner .srb-meta { font-size: 12px; color: var(--text-muted); margin: 0; }
-    .scan-info-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;
-    }
+    .scan-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
     .scan-info-cell { background: var(--input-bg); border-radius: var(--radius-sm); padding: 11px 13px; }
     .scan-info-cell .sic-label { font-size: 10px; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
     .scan-info-cell .sic-val   { font-size: 14px; font-weight: 700; color: var(--text); }
@@ -237,20 +209,11 @@
       font-family: inherit; cursor: pointer; transition: opacity 0.2s;
     }
     .scan-autofill-btn:hover { opacity: 0.88; }
-
-    /* ── SCAN LOADER ── */
     .scan-loader {
-      display: none;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 28px 16px;
-      margin-top: 10px;
-      background: var(--green-light);
-      border: 1.5px solid var(--green-mid);
-      border-radius: var(--radius-sm);
-      text-align: center;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px; padding: 28px 16px; margin-top: 10px;
+      background: var(--green-light); border: 1.5px solid var(--green-mid);
+      border-radius: var(--radius-sm); text-align: center;
     }
     .scan-loader.visible { display: flex; }
     .scan-loader .spinner { margin: 0; }
@@ -283,7 +246,6 @@
 
   <div class="main-content">
 
-    <!-- ── LOADING CARD ── -->
     <div class="loading-card" id="loading-card">
       <div class="loading-card-top">
         <div class="loading-pulse">
@@ -329,7 +291,6 @@
       </div>
     </div>
 
-    <!-- ── RESULT CARD ── -->
     <div class="ai-result-card" id="result-card">
       <div class="ai-result-banner" id="result-banner">
         <div class="ai-banner-icon" id="banner-icon"></div>
@@ -374,7 +335,6 @@
       </div>
     </div>
 
-    <!-- ── SCANNER SECTION ── -->
     <div class="scanner-wrap" id="scanner-wrap" style="display:none;">
       <button class="scanner-toggle" onclick="toggleScanner()">
         <span style="font-size:20px;">📷</span>
@@ -449,7 +409,6 @@
       beauty: '💄', sports: '⚽', home: '🏠', others: '🛍️',
     };
 
-    // Pre-fill item preview in loading card
     if (pending) {
       const emoji = categoryEmoji[(pending.category || '').toLowerCase()] || '🛍️';
       document.getElementById('loading-emoji').textContent = emoji;
@@ -568,6 +527,38 @@
 
     async function decide(outcome) {
       const aiTag = sessionStorage.getItem('ic_rec_tag') || outcome;
+
+      // ── Budget check for BUY only ──
+      if (outcome === 'BUY') {
+        try {
+          const budgetData = await Budget.get();
+          if (budgetData && budgetData.budget) {
+            const budgetAmount = parseFloat(budgetData.budget.amount) || 0;
+            const purchaseData = await Purchases.getAll();
+            const now = new Date();
+            const thisMonthSpent = purchaseData.purchases
+              .filter(p => {
+                const d = new Date(p.created_at);
+                return d.getMonth() === now.getMonth() &&
+                       d.getFullYear() === now.getFullYear() &&
+                       p.user_decision === 'BUY';
+              })
+              .reduce((s, p) => s + parseFloat(p.price), 0);
+            const remaining = budgetAmount - thisMonthSpent;
+            if (remaining <= 0) {
+              alert('⚠️ Budget Exceeded!\n\nYou have no remaining budget for this month. Please set a new budget or save this as Avoided/Delayed instead.');
+              return;
+            }
+            if (parseFloat(pending.price) > remaining) {
+              const confirmed = confirm(`⚠️ Over Budget!\n\nThis purchase (${fmt(parseFloat(pending.price), true)}) exceeds your remaining budget (${fmt(remaining, true)}).\n\nDo you still want to proceed?`);
+              if (!confirmed) return;
+            }
+          }
+        } catch(e) {
+          console.warn('Budget check failed:', e.message);
+        }
+      }
+
       try {
         await Purchases.save({
           item_name:     pending.name,
@@ -580,7 +571,7 @@
         });
       } catch (err) {
         console.error('Save purchase error:', err.message);
-    alert('⚠️ Could not save to database: ' + err.message);
+        alert('⚠️ Could not save to database: ' + err.message);
       }
       saveToLocalStorage(pending.name, pending.price, pending.category, outcome, aiTag);
       sessionStorage.removeItem('ic_pending');
