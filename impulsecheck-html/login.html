@@ -126,6 +126,12 @@
           }
           showError(data.error); return;
         }
+        // Clear previous account's local data
+        localStorage.removeItem('ic_activity');
+        localStorage.removeItem('ic_budget');
+        localStorage.removeItem('ic_notifications');
+        localStorage.removeItem('ic_categories');
+
         localStorage.setItem('ic_token',    data.token);
         localStorage.setItem('ic_user',     JSON.stringify(data.user));
         localStorage.setItem('ic_currency', data.user.currency || 'PHP');
