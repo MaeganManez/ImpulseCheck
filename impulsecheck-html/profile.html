@@ -124,6 +124,61 @@
     }
     .btn-edit-small:hover { border-color: var(--green); color: var(--green); background: var(--green-light); }
 
+    /* ── QR CODE SECTION ── */
+    .qr-section {
+      padding-top: 16px;
+      border-top: 1.5px solid var(--border);
+      margin-top: 8px;
+    }
+    .qr-section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 14px;
+    }
+    .qr-section-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .qr-section-desc  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .qr-card {
+      background: var(--input-bg);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+    .qr-card canvas {
+      border-radius: 8px;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    }
+    .qr-card-info { text-align: center; }
+    .qr-card-info strong { font-size: 14px; font-weight: 700; color: var(--text); display: block; margin-bottom: 4px; }
+    .qr-card-info p { font-size: 12px; color: var(--text-muted); margin: 0; line-height: 1.6; }
+
+    .qr-actions { display: flex; gap: 10px; width: 100%; }
+    .btn-qr-download {
+      flex: 1; padding: 11px; border-radius: var(--radius-sm);
+      background: var(--green); color: #fff; border: none;
+      font-size: 13px; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: opacity 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .btn-qr-download:hover { opacity: 0.88; }
+    .btn-qr-refresh {
+      padding: 11px 14px; border-radius: var(--radius-sm);
+      background: var(--input-bg); color: var(--text-muted);
+      border: 1.5px solid var(--border);
+      font-size: 13px; font-weight: 700; font-family: inherit;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .btn-qr-refresh:hover { border-color: var(--green); color: var(--green); }
+
+    .qr-loading {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: var(--text-muted); padding: 20px 0;
+    }
+
     @media (max-width: 640px) {
       .profile-card { padding: 24px 16px 24px; }
       .profile-btns { flex-direction: column; }
@@ -207,7 +262,6 @@
         </select>
       </div>
 
-      <!-- Toggle saves instantly — no Edit required -->
       <div class="toggle-wrap">
         <div class="toggle-info">
           <div class="toggle-label">Pre-select default emotion</div>
@@ -228,14 +282,42 @@
         <button class="btn btn-outline-red" onclick="logout()">Log out</button>
       </div>
 
+      <!-- ── QR CODE SECTION ── -->
+      <div class="qr-section">
+        <div class="qr-section-header">
+          <div>
+            <div class="qr-section-title">📱 My Login QR Code</div>
+            <div class="qr-section-desc">Save this QR to log in instantly — no password needed</div>
+          </div>
+        </div>
+
+        <div class="qr-card" id="qr-card">
+          <div class="qr-loading" id="qr-loading">
+            <div class="spinner"></div> Generating your QR code…
+          </div>
+          <canvas id="qr-canvas" style="display:none;"></canvas>
+          <div class="qr-card-info" id="qr-card-info" style="display:none;">
+            <strong id="qr-user-label">Your Login QR</strong>
+            <p>Screenshot or download this QR code.<br/>On the login page, tap <strong>"Login with QR"</strong> and upload it.</p>
+          </div>
+          <div class="qr-actions" id="qr-actions" style="display:none;">
+            <button class="btn-qr-download" onclick="downloadQR()">⬇️ Save QR Code</button>
+            <button class="btn-qr-refresh" onclick="loadQR()" title="Regenerate">🔄</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <div class="toast" id="toast"></div>
 
+  <!-- QRCode.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="api.js"></script>
   <script>
     let origName = '', origEmail = '', origCurrency = '';
+    let currentQRUrl = '';
 
     function updateCurrencyBadge() {
       const sel = document.getElementById('pref-currency');
@@ -243,7 +325,6 @@
       document.getElementById('currency-badge').textContent = opt.dataset.symbol + ' ' + opt.value;
     }
 
-    // Saves instantly when toggle is clicked — no Edit needed
     function saveEmotionPref() {
       const on = document.getElementById('pref-emotion').checked;
       localStorage.setItem('ic_default_emotion', on ? 'neutral' : '');
@@ -278,6 +359,79 @@
       document.getElementById('edit-btn').style.display = 'flex';
     }
 
+    /* ── QR CODE ── */
+    async function loadQR() {
+      document.getElementById('qr-loading').style.display    = 'flex';
+      document.getElementById('qr-canvas').style.display     = 'none';
+      document.getElementById('qr-card-info').style.display  = 'none';
+      document.getElementById('qr-actions').style.display    = 'none';
+
+      try {
+        const token = localStorage.getItem('ic_token') || localStorage.getItem('token');
+        const res   = await fetch('https://impulsecheck-backend.onrender.com/api/qrauth/my-qr', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed');
+
+        currentQRUrl = data.qrUrl;
+
+        // Draw QR on canvas using QRCode.js
+        const canvas = document.getElementById('qr-canvas');
+        canvas.innerHTML = '';
+
+        // Use a temp div then copy to canvas
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'none';
+        document.body.appendChild(tempDiv);
+
+        new QRCode(tempDiv, {
+          text:          currentQRUrl,
+          width:         200,
+          height:        200,
+          colorDark:     '#1a4a5c',
+          colorLight:    '#ffffff',
+          correctLevel:  QRCode.CorrectLevel.H,
+        });
+
+        // QRCode.js creates an img inside tempDiv
+        setTimeout(() => {
+          const img = tempDiv.querySelector('img');
+          if (img) {
+            const displayCanvas = document.getElementById('qr-canvas');
+            displayCanvas.width  = 200;
+            displayCanvas.height = 200;
+            const ctx = displayCanvas.getContext('2d');
+            const image = new Image();
+            image.onload = () => {
+              ctx.drawImage(image, 0, 0, 200, 200);
+              document.getElementById('qr-loading').style.display   = 'none';
+              displayCanvas.style.display                            = 'block';
+              document.getElementById('qr-card-info').style.display = 'block';
+              document.getElementById('qr-actions').style.display   = 'flex';
+            };
+            image.src = img.src;
+          }
+          document.body.removeChild(tempDiv);
+        }, 300);
+
+        const user = getUser();
+        if (user) document.getElementById('qr-user-label').textContent = user.full_name + "'s Login QR";
+
+      } catch (err) {
+        document.getElementById('qr-loading').innerHTML = '❌ Failed to load QR. <button onclick="loadQR()" style="color:var(--green);background:none;border:none;cursor:pointer;font-weight:700;">Retry</button>';
+      }
+    }
+
+    function downloadQR() {
+      const canvas = document.getElementById('qr-canvas');
+      const link   = document.createElement('a');
+      link.download = 'impulsecheck-login-qr.png';
+      link.href     = canvas.toDataURL('image/png');
+      link.click();
+      showToast('✅ QR code saved!');
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
       const user = getUser();
       if (user) {
@@ -296,13 +450,13 @@
       }
       updateCurrencyBadge();
 
-      // Load saved emotion toggle state (no 'checked' hardcoded in HTML)
       const savedEmotion = localStorage.getItem('ic_default_emotion');
       document.getElementById('pref-emotion').checked = savedEmotion === 'neutral';
 
-      // Initial state — hide save/cancel, show logout
       document.getElementById('profile-btns').style.display = 'none';
       document.getElementById('logout-row').style.display   = 'flex';
+
+      loadQR();
     });
 
     async function saveProfile() {
