@@ -24,10 +24,37 @@
     .forgot-row { text-align:right; margin-top:-6px; margin-bottom:14px; }
     .forgot-link { font-size:12px; color:var(--green); font-weight:600; }
     .forgot-link:hover { text-decoration:underline; }
-    .divider-text { display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:13px; margin:20px 0 8px; }
+    .divider-text { display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:13px; margin:16px 0; }
     .divider-text::before, .divider-text::after { content:''; flex:1; height:1px; background:var(--border); }
-    .signup-row { text-align:center; font-size:13px; color:var(--text-muted); }
+    .signup-row { text-align:center; font-size:13px; color:var(--text-muted); margin-top:14px; }
     .signup-row a { color:var(--blue-link); font-weight:700; }
+
+    /* Google button */
+    .btn-google {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px 16px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+    }
+    .btn-google:hover {
+      background: var(--input-bg);
+      border-color: #4285f4;
+      box-shadow: 0 2px 8px rgba(66,133,244,0.15);
+    }
+    .btn-google svg { flex-shrink: 0; }
+
     @media (max-width:560px) { .auth-card { padding:28px 20px 24px; } }
   </style>
 </head>
@@ -37,6 +64,20 @@
 
     <div class="auth-card">
       <div id="error-banner" class="error-banner" style="display:none"></div>
+
+      <!-- Google Sign In -->
+      <a href="https://impulsecheck-backend.onrender.com/auth/google" class="btn-google">
+        <svg width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <path fill="none" d="M0 0h48v48H0z"/>
+        </svg>
+        Continue with Google
+      </a>
+
+      <div class="divider-text">or sign in with email</div>
 
       <div class="field">
         <div class="input-wrap">
@@ -61,8 +102,7 @@
 
       <button class="btn btn-primary" onclick="handleLogin()">Log In</button>
 
-      <div class="divider-text">Don't have an account?</div>
-      <div class="signup-row"><a href="register.html">Sign Up</a></div>
+      <div class="signup-row">Don't have an account? <a href="register.html">Sign Up</a></div>
     </div>
   </div>
 
@@ -70,18 +110,14 @@
     async function handleLogin() {
       const email    = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
-
       if (!email || !password) { showError('Please fill in all fields.'); return; }
-
       try {
         const res  = await fetch('https://impulsecheck-backend.onrender.com/api/auth/login', {
           method:'POST', headers:{'Content-Type':'application/json'},
           body: JSON.stringify({ email, password }),
         });
         const data = await res.json();
-
         if (!res.ok) {
-          // If unverified, redirect to OTP page
           if (data.needs_verification) {
             sessionStorage.setItem('otp_user_id', data.user_id);
             sessionStorage.setItem('otp_email',   email);
@@ -90,12 +126,10 @@
           }
           showError(data.error); return;
         }
-
-        localStorage.setItem('ic_token', data.token);
-        localStorage.setItem('ic_user',  JSON.stringify(data.user));
+        localStorage.setItem('ic_token',    data.token);
+        localStorage.setItem('ic_user',     JSON.stringify(data.user));
         localStorage.setItem('ic_currency', data.user.currency || 'PHP');
         window.location.href = 'dashboard.html';
-
       } catch (err) {
         showError('Cannot connect to server. Make sure the backend is running.');
       }

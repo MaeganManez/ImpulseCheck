@@ -3,22 +3,89 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ImpulseCheck – AI Recommendation</title>
+  <title>ImpulseCheck – Recommendation</title>
   <link rel="stylesheet" href="shared.css" />
   <style>
-    .ai-loading-card {
+    /* ── LOADING CARD ── */
+    .loading-card {
       background: var(--card);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
-      padding: 48px 40px 44px;
       max-width: 620px;
       margin: 0 auto;
+      overflow: hidden;
+    }
+    .loading-card-top {
+      background: linear-gradient(135deg, #1a4a5c 0%, #0f6e56 100%);
+      padding: 32px 28px 28px;
       text-align: center;
     }
-    .ai-loading-card h2 { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
-    .ai-loading-card p  { font-size: 14px; color: var(--text-muted); margin-bottom: 36px; line-height: 1.5; }
-    .ai-steps { text-align: left; max-width: 320px; margin: 0 auto; }
+    .loading-pulse {
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 18px;
+      position: relative;
+    }
+    .loading-pulse::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.25);
+      animation: pulseRing 1.8s ease-out infinite;
+    }
+    @keyframes pulseRing {
+      0%   { transform: scale(0.95); opacity: 1; }
+      100% { transform: scale(1.25); opacity: 0; }
+    }
+    .loading-card-top h2 {
+      font-size: 20px; font-weight: 800;
+      color: #fff; margin: 0 0 6px;
+    }
+    .loading-card-top p {
+      font-size: 13px; color: rgba(255,255,255,0.75);
+      margin: 0; line-height: 1.5;
+    }
+    .loading-card-body {
+      padding: 24px 28px 28px;
+    }
+    .loading-item-preview {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--input-bg);
+      border-radius: var(--radius-sm);
+      padding: 13px 16px;
+      margin-bottom: 22px;
+    }
+    .loading-item-preview .lip-emoji { font-size: 22px; flex-shrink: 0; }
+    .loading-item-preview .lip-name  { font-size: 15px; font-weight: 700; color: var(--text); }
+    .loading-item-preview .lip-meta  { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
 
+    .steps-list { display: flex; flex-direction: column; gap: 12px; }
+    .step-row {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; font-weight: 600; color: var(--text-muted);
+      transition: color 0.3s;
+    }
+    .step-row.done   { color: var(--text); }
+    .step-row.active { color: var(--green); }
+    .step-icon {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: background 0.3s;
+    }
+    .step-icon.pending { background: var(--input-bg); }
+    .step-icon.active  {
+      background: var(--green-light);
+      border: 2px solid var(--green);
+    }
+    .step-icon.done    { background: var(--green); }
+    .step-icon.active svg  { stroke: var(--green); }
+    .step-icon.done svg    { stroke: #fff; }
+    .step-icon.pending svg { stroke: var(--text-light); }
+
+    /* ── RESULT CARD ── */
     .ai-result-card {
       background: var(--card);
       border-radius: var(--radius);
@@ -170,17 +237,32 @@
       font-family: inherit; cursor: pointer; transition: opacity 0.2s;
     }
     .scan-autofill-btn:hover { opacity: 0.88; }
-    .scan-loader { display: none; flex-direction: column; align-items: center; padding: 28px 0; gap: 12px; }
+
+    /* ── SCAN LOADER ── */
+    .scan-loader {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 28px 16px;
+      margin-top: 10px;
+      background: var(--green-light);
+      border: 1.5px solid var(--green-mid);
+      border-radius: var(--radius-sm);
+      text-align: center;
+    }
     .scan-loader.visible { display: flex; }
-    .scan-loader p { font-size: 13px; color: var(--text-muted); }
+    .scan-loader .spinner { margin: 0; }
 
     @media (max-width: 600px) {
-      .ai-loading-card { padding: 36px 20px 32px; }
-      .ai-result-body  { padding: 20px 16px 20px; }
-      .decision-row    { flex-direction: column; }
+      .loading-card-top  { padding: 24px 18px 20px; }
+      .loading-card-body { padding: 18px 16px 22px; }
+      .ai-result-body    { padding: 20px 16px 20px; }
+      .decision-row      { flex-direction: column; }
       .ai-banner-text h2 { font-size: 17px; }
-      .scanner-body { padding: 16px; }
-      .scan-info-grid { grid-template-columns: 1fr; }
+      .scanner-body      { padding: 16px; }
+      .scan-info-grid    { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -201,38 +283,53 @@
 
   <div class="main-content">
 
-    <!-- LOADING CARD -->
-    <div class="ai-loading-card" id="loading-card">
-      <div class="spinner"></div>
-      <h2>Analyzing your purchase...</h2>
-      <p>Our AI is reviewing your input and financial context.<br/>This usually takes just a moment.</p>
-      <div class="ai-steps" id="steps-container">
-        <div class="ai-step text-done" id="step-1">
-          <div class="ai-step-icon done">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
-          </div>
-          Purchase details received
+    <!-- ── LOADING CARD ── -->
+    <div class="loading-card" id="loading-card">
+      <div class="loading-card-top">
+        <div class="loading-pulse">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <div class="ai-step text-done" id="step-2">
-          <div class="ai-step-icon done">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
+        <h2>Analyzing your purchase…</h2>
+        <p>Reviewing your input and financial context.<br/>This usually takes just a moment.</p>
+      </div>
+      <div class="loading-card-body">
+        <div class="loading-item-preview" id="loading-item-preview">
+          <div class="lip-emoji" id="loading-emoji">🛍️</div>
+          <div>
+            <div class="lip-name" id="loading-name">—</div>
+            <div class="lip-meta" id="loading-meta">—</div>
           </div>
-          Emotion context analyzed
         </div>
-        <div class="ai-step text-active" id="step-3">
-          <div class="ai-step-icon active">
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="4"/></svg>
+        <div class="steps-list">
+          <div class="step-row done" id="step-1">
+            <div class="step-icon done">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
+            </div>
+            Purchase details received
           </div>
-          Checking budget status...
-        </div>
-        <div class="ai-step" id="step-4">
-          <div class="ai-step-icon pending"></div>
-          Generating recommendation
+          <div class="step-row done" id="step-2">
+            <div class="step-icon done">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>
+            </div>
+            Emotion context analyzed
+          </div>
+          <div class="step-row active" id="step-3">
+            <div class="step-icon active">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="4"/></svg>
+            </div>
+            Checking budget status…
+          </div>
+          <div class="step-row" id="step-4">
+            <div class="step-icon pending">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/></svg>
+            </div>
+            Generating recommendation
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- RESULT CARD -->
+    <!-- ── RESULT CARD ── -->
     <div class="ai-result-card" id="result-card">
       <div class="ai-result-banner" id="result-banner">
         <div class="ai-banner-icon" id="banner-icon"></div>
@@ -243,7 +340,7 @@
       </div>
       <div class="ai-result-body">
         <div id="fallback-notice" style="display:none;">
-          <div class="fallback-badge">⚡ Quick analysis — AI unavailable</div>
+          <div class="fallback-badge">⚡ Quick analysis</div>
         </div>
         <div class="ai-item-row">
           <div class="ai-item-emoji" id="item-emoji">🛍️</div>
@@ -258,7 +355,7 @@
         </div>
         <hr class="ai-divider" />
         <div class="ai-section">
-          <div class="ai-section-label">💬 AI Advice</div>
+          <div class="ai-section-label">💬 Advice</div>
           <div class="ai-advice-box" id="result-advice"></div>
         </div>
         <div class="ai-section">
@@ -277,11 +374,11 @@
       </div>
     </div>
 
-    <!-- SCANNER SECTION -->
+    <!-- ── SCANNER SECTION ── -->
     <div class="scanner-wrap" id="scanner-wrap" style="display:none;">
       <button class="scanner-toggle" onclick="toggleScanner()">
         <span style="font-size:20px;">📷</span>
-        Scan a product image instead — use AI Vision
+        Scan a product image instead
         <span style="margin-left:auto;font-size:18px;" id="scanner-chevron">▾</span>
       </button>
       <div class="scanner-card" id="scanner-card">
@@ -289,7 +386,7 @@
           <div class="scanner-header-icon">📷</div>
           <div class="scanner-header-text">
             <h3>Product Image Scanner</h3>
-            <p>Take a photo or upload an image — AI identifies the product and scores impulse risk</p>
+            <p>Take a photo or upload an image — identifies the product and scores impulse risk</p>
           </div>
         </div>
         <div class="scanner-body">
@@ -302,10 +399,11 @@
           </div>
           <button class="btn btn-buy" id="scan-btn"
             style="width:100%;margin:0;padding:13px;font-size:14px;display:none;"
-            onclick="runScan()">✨ Analyze with AI Vision</button>
+            onclick="runScan()">✨ Analyze Product</button>
           <div class="scan-loader" id="scan-loader">
             <div class="spinner"></div>
-            <p>Identifying product with Gemini Vision…</p>
+            <p style="margin:0;font-size:14px;font-weight:700;color:var(--green-dark);">Identifying product…</p>
+            <p style="margin:0;font-size:12px;color:var(--text-muted);">Reading image · Matching category · Estimating price</p>
           </div>
           <div class="scan-result-area" id="scan-result-area">
             <div class="scan-result-banner" id="srb-banner">
@@ -325,7 +423,7 @@
               <div class="risk-bar-top"><span>Impulse risk</span><span id="sic-risk-label">—</span></div>
               <div class="risk-bar-track"><div class="risk-bar-fill" id="risk-bar-fill" style="width:0%"></div></div>
             </div>
-            <div class="ai-section-label" style="margin-bottom:8px;">💬 AI Intervention</div>
+            <div class="ai-section-label" style="margin-bottom:8px;">💬 Intervention</div>
             <div class="scan-message" id="scan-message">—</div>
             <div class="ai-section-label" style="margin-bottom:8px;">💡 Alternatives</div>
             <div class="scan-alts" id="scan-alts"></div>
@@ -335,7 +433,7 @@
       </div>
     </div>
 
-  </div><!-- /main-content -->
+  </div>
 
   <script src="api.js"></script>
   <script src="currency.js"></script>
@@ -351,23 +449,35 @@
       beauty: '💄', sports: '⚽', home: '🏠', others: '🛍️',
     };
 
-    function checkSVG() {
-      return `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>`;
+    // Pre-fill item preview in loading card
+    if (pending) {
+      const emoji = categoryEmoji[(pending.category || '').toLowerCase()] || '🛍️';
+      document.getElementById('loading-emoji').textContent = emoji;
+      document.getElementById('loading-name').textContent  = pending.name;
+      document.getElementById('loading-meta').textContent  =
+        fmt(parseFloat(pending.price), true) + ' · ' + (pending.category || 'General');
     }
-    function dotSVG() {
-      return `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="4"/></svg>`;
+
+    function checkSVG(color) {
+      return `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="${color || '#fff'}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20,6 9,17 4,12"/></svg>`;
     }
+    function dotSVG(color) {
+      return `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="${color || 'currentColor'}" stroke-width="3"><circle cx="12" cy="12" r="4"/></svg>`;
+    }
+
     function markStepDone(id) {
       const el = document.getElementById(id); if (!el) return;
-      el.querySelector('.ai-step-icon').className = 'ai-step-icon done';
-      el.querySelector('.ai-step-icon').innerHTML = checkSVG();
-      el.className = 'ai-step text-done';
+      el.className = 'step-row done';
+      const icon = el.querySelector('.step-icon');
+      icon.className = 'step-icon done';
+      icon.innerHTML = checkSVG('#fff');
     }
     function markStepActive(id, label) {
       const el = document.getElementById(id); if (!el) return;
-      el.querySelector('.ai-step-icon').className = 'ai-step-icon active';
-      el.querySelector('.ai-step-icon').innerHTML = dotSVG();
-      el.className = 'ai-step text-active';
+      el.className = 'step-row active';
+      const icon = el.querySelector('.step-icon');
+      icon.className = 'step-icon active';
+      icon.innerHTML = dotSVG('var(--green)');
       if (label) el.lastChild.textContent = ' ' + label;
     }
 
@@ -409,10 +519,10 @@
     async function run() {
       let isFallback = false;
       const apiPromise = getAIRecommendation().catch(err => {
-        console.error('AI error:', err); isFallback = true;
+        console.error('Analysis error:', err); isFallback = true;
         return getFallbackRecommendation();
       });
-      setTimeout(() => { markStepDone('step-3'); markStepActive('step-4', 'Generating recommendation...'); }, 1400);
+      setTimeout(() => { markStepDone('step-3'); markStepActive('step-4', 'Generating recommendation…'); }, 1400);
       const [rec] = await Promise.all([apiPromise, new Promise(r => setTimeout(r, 2600))]);
       markStepDone('step-4');
       setTimeout(() => showResult(rec, isFallback), 400);
@@ -442,7 +552,6 @@
         alternative: 'Check if there is a discount or better deal available before purchasing.' };
     }
 
-    /* ── KEY FIX: save to localStorage so dashboard + report see it ── */
     function saveToLocalStorage(name, price, category, outcome, aiTag) {
       const activity = JSON.parse(localStorage.getItem('ic_activity') || '[]');
       activity.push({
@@ -459,8 +568,6 @@
 
     async function decide(outcome) {
       const aiTag = sessionStorage.getItem('ic_rec_tag') || outcome;
-
-      /* 1 — save to backend */
       try {
         await Purchases.save({
           item_name:     pending.name,
@@ -474,19 +581,14 @@
       } catch (err) {
         console.error('Save purchase error:', err.message);
       }
-
-      /* 2 — save to localStorage so dashboard + spending-report show it */
       saveToLocalStorage(pending.name, pending.price, pending.category, outcome, aiTag);
-
       sessionStorage.removeItem('ic_pending');
-
       const msgs = {
         BUY:   '✅ Purchase saved as Buy!',
         WAIT:  '⏳ Saved as Delayed — good thinking!',
         AVOID: '🚫 Great choice — purchase avoided!',
       };
       sessionStorage.setItem('toast_msg', msgs[outcome]);
-
       if (typeof addLocalNotification === 'function') {
         const titles = { BUY: '🛒 Purchase Recorded', WAIT: '⏳ Purchase Delayed', AVOID: '🚫 Purchase Avoided' };
         const notifMsgs = {
@@ -496,7 +598,6 @@
         };
         addLocalNotification(titles[outcome], notifMsgs[outcome], outcome.toLowerCase());
       }
-
       window.location.href = 'dashboard.html';
     }
 

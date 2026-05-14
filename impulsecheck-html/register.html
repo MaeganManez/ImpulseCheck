@@ -19,7 +19,6 @@
     }
     .auth-card h2 { font-size: 22px; font-weight: 700; text-align: center; color: var(--text); margin-bottom: 24px; }
 
-    /* ── FORM INPUTS ── */
     .field { margin-bottom: 14px; }
     .field label { display: block; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
     .field label .req { color: var(--red); margin-left: 2px; }
@@ -43,18 +42,15 @@
     }
     .toggle-pw:hover { color: var(--text-muted); }
 
-    /* Two-column row */
     .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
     @media (max-width: 480px) { .field-row { grid-template-columns: 1fr; } }
 
-    /* ── STRENGTH BAR ── */
     .strength-wrap { margin-top: 8px; display: none; }
     .strength-wrap.show { display: block; }
     .strength-track { height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 4px; }
     .strength-fill  { height: 100%; border-radius: 99px; transition: width 0.3s, background 0.3s; width: 0%; }
     .strength-lbl   { font-size: 11px; font-weight: 700; }
 
-    /* ── CRITERIA LIST ── */
     .criteria { margin-top: 10px; display: none; }
     .criteria.show { display: block; }
     .crit {
@@ -70,12 +66,10 @@
     }
     .crit.met .crit-icon { background: var(--green); border-color: var(--green); color: #fff; }
 
-    /* ── MATCH HINT ── */
     .match-hint { font-size: 11px; font-weight: 600; margin-top: 5px; display: none; }
     .match-hint.ok  { color: var(--green); display: block; }
     .match-hint.bad { color: var(--red);   display: block; }
 
-    /* ── TERMS ── */
     .terms-row {
       display: flex; align-items: flex-start; gap: 10px;
       background: var(--input-bg); border: 1.5px solid var(--border);
@@ -90,7 +84,6 @@
     .terms-text a:hover { text-decoration: underline; }
     .terms-note { font-size: 11px; color: var(--tag-wait-fg); font-weight: 600; margin-top: 4px; }
 
-    /* ── TERMS MODAL ── */
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(15,23,35,0.6);
       backdrop-filter: blur(4px); z-index: 1000;
@@ -133,7 +126,35 @@
     }
     .btn-agree.enabled { opacity: 1; pointer-events: all; }
 
-    /* ── LOGIN ROW ── */
+    /* Google button */
+    .btn-google {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 13px 16px;
+      border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+      margin-bottom: 4px;
+    }
+    .btn-google:hover {
+      background: var(--input-bg);
+      border-color: #4285f4;
+      box-shadow: 0 2px 8px rgba(66,133,244,0.15);
+    }
+
+    .divider-text { display:flex; align-items:center; gap:10px; color:var(--text-muted); font-size:13px; margin:16px 0; }
+    .divider-text::before, .divider-text::after { content:''; flex:1; height:1px; background:var(--border); }
+
     .login-row { text-align: center; font-size: 13px; color: var(--text-muted); margin-top: 14px; }
     .login-row a { color: var(--blue-link); font-weight: 700; }
 
@@ -147,6 +168,20 @@
     <div class="auth-card">
       <h2>Create Account</h2>
       <div id="error-banner" class="error-banner" style="display:none"></div>
+
+      <!-- Google Sign Up -->
+      <a href="https://impulsecheck-backend.onrender.com/auth/google" class="btn-google">
+        <svg width="18" height="18" viewBox="0 0 48 48">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          <path fill="none" d="M0 0h48v48H0z"/>
+        </svg>
+        Continue with Google
+      </a>
+
+      <div class="divider-text">or create account with email</div>
 
       <!-- Full Name + Username -->
       <div class="field-row">
@@ -238,7 +273,7 @@
         <div class="match-hint" id="match-hint"></div>
       </div>
 
-      <!-- Terms & Conditions -->
+      <!-- Terms -->
       <div class="terms-row" id="terms-row">
         <input type="checkbox" class="terms-cb" id="terms-cb" disabled />
         <div>
@@ -278,8 +313,8 @@
         <p>You are responsible for maintaining the confidentiality of your account credentials. You agree to provide accurate and complete information during registration. You are solely responsible for all activity that occurs under your account.</p>
         <h4>4. Privacy and Data</h4>
         <p>ImpulseCheck collects personal information including name, email, date of birth, and financial behavior data solely for the purpose of providing personalized recommendations. We do not sell your data to third parties. All data is stored securely and accessed only by authorized systems.</p>
-        <h4>5. AI Recommendations Disclaimer</h4>
-        <p>The purchase recommendations provided by ImpulseCheck are generated by an AI model and are for informational and behavioral guidance purposes only. They do not constitute financial advice. ImpulseCheck is not liable for any financial decisions made based on AI recommendations.</p>
+        <h4>5. Recommendations Disclaimer</h4>
+        <p>The purchase recommendations provided by ImpulseCheck are generated by an AI model and are for informational and behavioral guidance purposes only. They do not constitute financial advice. ImpulseCheck is not liable for any financial decisions made based on recommendations.</p>
         <h4>6. Account Termination</h4>
         <p>We reserve the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or misuse the platform in any way.</p>
         <h4>7. Modifications</h4>
@@ -296,9 +331,6 @@
   </div>
 
   <script>
-    /* ═══════════════════════════════════
-       PASSWORD STRENGTH
-    ═══════════════════════════════════ */
     const RULES = [
       { id: 'c-len', test: p => p.length >= 8 },
       { id: 'c-up',  test: p => /[A-Z]/.test(p) },
@@ -316,8 +348,7 @@
     ];
 
     function onPwInput() {
-      const pw  = document.getElementById('password').value;
-      const inp = document.getElementById('password');
+      const pw = document.getElementById('password').value;
       document.getElementById('criteria').classList.toggle('show', pw.length > 0);
       document.getElementById('strength-wrap').classList.toggle('show', pw.length > 0);
       let count = 0;
@@ -331,7 +362,6 @@
       document.getElementById('strength-fill').style.cssText = `width:${lv.w};background:${lv.color}`;
       const lbl = document.getElementById('strength-lbl');
       lbl.textContent = lv.lbl; lbl.style.color = lv.color;
-      inp.className = pw.length === 0 ? 'no-right' : count === 5 ? 'no-right ok' : 'no-right';
       if (document.getElementById('confirm').value) onConfirmInput();
     }
 
@@ -354,20 +384,10 @@
         : `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
     }
 
-    /* ═══════════════════════════════════
-       TERMS MODAL
-    ═══════════════════════════════════ */
     let termsRead = false;
-
-    function openTerms() {
-      document.getElementById('terms-modal').classList.add('open');
-    }
-    function closeTerms() {
-      document.getElementById('terms-modal').classList.remove('open');
-    }
-    function closeTermsOutside(e) {
-      if (e.target.id === 'terms-modal') closeTerms();
-    }
+    function openTerms() { document.getElementById('terms-modal').classList.add('open'); }
+    function closeTerms() { document.getElementById('terms-modal').classList.remove('open'); }
+    function closeTermsOutside(e) { if (e.target.id === 'terms-modal') closeTerms(); }
     function onTermsScroll() {
       const body = document.getElementById('terms-body');
       const atBottom = body.scrollTop + body.clientHeight >= body.scrollHeight - 20;
@@ -379,16 +399,12 @@
     function agreeTerms() {
       termsRead = true;
       const cb = document.getElementById('terms-cb');
-      cb.disabled = false;
-      cb.checked  = true;
+      cb.disabled = false; cb.checked = true;
       document.getElementById('terms-note').style.display = 'none';
       document.getElementById('terms-row').classList.remove('highlight');
       closeTerms();
     }
 
-    /* ═══════════════════════════════════
-       REGISTER
-    ═══════════════════════════════════ */
     async function handleRegister() {
       const full_name     = document.getElementById('full_name').value.trim();
       const username      = document.getElementById('username').value.trim();
@@ -399,33 +415,22 @@
       const pw            = document.getElementById('password').value;
       const confirm       = document.getElementById('confirm').value;
 
-      // Required
-      if (!full_name || !username || !email || !pw || !confirm) {
-        showError('Please fill in all required fields.'); return;
-      }
-      // Email
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        showError('Please enter a valid email address.'); return;
-      }
-      // Password
+      if (!full_name || !username || !email || !pw || !confirm) { showError('Please fill in all required fields.'); return; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showError('Please enter a valid email address.'); return; }
       if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,}$/.test(pw)) {
         showError('Password does not meet the requirements.');
         document.getElementById('criteria').classList.add('show');
         document.getElementById('strength-wrap').classList.add('show');
         onPwInput(); return;
       }
-      // Match
       if (pw !== confirm) { showError('Passwords do not match.'); onConfirmInput(); return; }
-      // Terms
       if (!document.getElementById('terms-cb').checked) {
         document.getElementById('terms-row').classList.add('highlight');
         showError('You must read and agree to the Terms and Conditions.');
         document.getElementById('terms-row').scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
-
       hideError();
-
       try {
         const res  = await fetch('https://impulsecheck-backend.onrender.com/api/auth/register', {
           method: 'POST',
@@ -433,14 +438,10 @@
           body: JSON.stringify({ full_name, username, email, phone_number, age: age||null, date_of_birth: date_of_birth||null, password: pw }),
         });
         const data = await res.json();
-
         if (!res.ok) { showError(data.error); return; }
-
-        // Save user_id for OTP page
         sessionStorage.setItem('otp_user_id', data.user_id);
         sessionStorage.setItem('otp_email', email);
         window.location.href = 'verify-otp.html';
-
       } catch (err) {
         showError('Cannot connect to server. Make sure the backend is running.');
       }
@@ -452,7 +453,6 @@
       b.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
     function hideError() { document.getElementById('error-banner').style.display = 'none'; }
-
     document.addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
   </script>
 </body>

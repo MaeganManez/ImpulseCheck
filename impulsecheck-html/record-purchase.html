@@ -250,8 +250,8 @@
           <div class="scanner-header">
             <div class="scanner-header-icon">📷</div>
             <div class="scanner-header-text">
-              <h3>AI Product Scanner</h3>
-              <p>Take a photo — AI identifies the product and fills the form for you</p>
+              <h3>Product Scanner</h3>
+              <p>Take a photo — Identifies the product and fills the form for you</p>
             </div>
           </div>
           <div class="scanner-body">
@@ -266,12 +266,12 @@
             </div>
 
             <button class="scan-analyze-btn" id="scan-analyze-btn" onclick="runScan()">
-              ✨ Analyze with AI Vision
+              ✨ Analyze Product
             </button>
 
             <div class="scan-loader" id="scan-loader">
               <div class="spinner"></div>
-              Identifying product with AI…
+              Identifying product…
             </div>
 
             <!-- Result strip shown after scan -->
@@ -374,9 +374,11 @@
       catSelect.appendChild(opt);
     }
 
-    // ── Currency symbol ──
-    const symEl = document.getElementById('price-symbol');
-    if (symEl) symEl.textContent = getCurrencySymbol();
+    // ── Auto-fill emotion if preference is set ──
+    const defaultEmotion = localStorage.getItem('ic_default_emotion');
+    if (defaultEmotion) {
+      document.getElementById('item-emotion').value = defaultEmotion;
+    }
 
     // ── Scanner autofill (coming from ai-recommendation scanner) ──
     const scanPrefill = JSON.parse(sessionStorage.getItem('ic_scan_prefill') || 'null');

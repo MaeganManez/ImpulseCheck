@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImpulseCheck – Signing in...</title>
+  <link rel="stylesheet" href="shared.css" />
+  <style>
+    .cb-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      background: var(--bg);
+    }
+    .cb-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 40px 48px;
+      text-align: center;
+      max-width: 400px;
+      width: 100%;
+    }
+    .cb-card h2 { font-size: 18px; font-weight: 700; color: var(--text); margin: 16px 0 8px; }
+    .cb-card p  { font-size: 14px; color: var(--text-muted); }
+    .cb-error   { color: var(--red); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="cb-page">
+    <img src="assets/logo.png" alt="" style="height:80px;width:auto;object-fit:contain;" />
+    <div class="cb-card">
+      <div class="spinner"></div>
+      <h2 id="cb-title">Signing you in…</h2>
+      <p id="cb-msg">Please wait a moment.</p>
+    </div>
+  </div>
+  <script>
+    const params   = new URLSearchParams(window.location.search);
+    const token    = params.get('token');
+    const error    = params.get('error');
+
+    if (error || !token) {
+      document.getElementById('cb-title').textContent = 'Sign-in failed';
+      document.getElementById('cb-msg').innerHTML = '<span class="cb-error">Google sign-in was cancelled or failed.<br/>Please try again.</span>';
+      setTimeout(() => window.location.href = 'login.html', 3000);
+    } else {
+      const user = {
+        id:        params.get('id'),
+        full_name: params.get('full_name'),
+        email:     params.get('email'),
+        currency:  params.get('currency') || 'PHP',
+      };
+      localStorage.setItem('ic_token',    token);
+      localStorage.setItem('ic_user',     JSON.stringify(user));
+      localStorage.setItem('ic_currency', user.currency);
+      sessionStorage.setItem('toast_msg', '✅ Signed in with Google!');
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

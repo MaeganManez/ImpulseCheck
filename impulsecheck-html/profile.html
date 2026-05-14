@@ -46,7 +46,6 @@
       user-select: none;
     }
 
-    /* Fields — read-only style matches original inputs visually */
     .field { margin-bottom: 14px; }
     .field label {
       font-size: 13px; font-weight: 600; color: var(--text);
@@ -65,17 +64,12 @@
       background: #fff;
     }
     .plain-input:read-only {
-      cursor: default;
-      color: var(--text);
-      background: var(--input-bg);
+      cursor: default; color: var(--text); background: var(--input-bg);
     }
     .plain-input:read-only:focus {
-      border-color: var(--input-border);
-      box-shadow: none;
-      background: var(--input-bg);
+      border-color: var(--input-border); box-shadow: none; background: var(--input-bg);
     }
 
-    /* Preferences */
     .pref-section-label {
       font-size: 15px; font-weight: 700; color: var(--text);
       margin: 22px 0 10px; padding-top: 16px;
@@ -106,15 +100,12 @@
     .currency-select:focus {
       border-color: var(--green);
       box-shadow: 0 0 0 3px rgba(46,170,126,0.12);
-      background-color: #fff;
-      outline: none;
+      background-color: #fff; outline: none;
     }
 
-    /* Buttons */
     .profile-btns { display: flex; gap: 12px; margin-top: 24px; }
     .profile-btns .btn { flex: 1; margin: 0; padding: 13px; }
 
-    /* Edit button — small, top right of section */
     .section-row {
       display: flex; align-items: center;
       justify-content: space-between;
@@ -156,7 +147,6 @@
   <div class="main-content">
     <div class="profile-card">
 
-      <!-- Avatar (initials only, no photo button) -->
       <div class="avatar-zone">
         <div class="avatar-ring">
           <div class="avatar-inner">
@@ -165,7 +155,6 @@
         </div>
       </div>
 
-      <!-- Profile Info section with Edit button -->
       <div class="section-row">
         <span class="section-row-label">Profile</span>
         <button class="btn-edit-small" id="edit-btn" onclick="startEditing()">
@@ -218,15 +207,18 @@
         </select>
       </div>
 
+      <!-- Toggle saves instantly — no Edit required -->
       <div class="toggle-wrap">
         <div class="toggle-info">
           <div class="toggle-label">Pre-select default emotion</div>
           <div class="toggle-desc">Auto-fill emotion field when recording a purchase</div>
         </div>
-        <label class="toggle"><input type="checkbox" id="pref-emotion" checked /><span class="toggle-slider"></span></label>
+        <label class="toggle">
+          <input type="checkbox" id="pref-emotion" onchange="saveEmotionPref()" />
+          <span class="toggle-slider"></span>
+        </label>
       </div>
 
-      <!-- Buttons: Save+Cancel when editing, Logout always -->
       <div class="profile-btns" id="profile-btns">
         <button class="btn btn-primary" onclick="saveProfile()">Save changes</button>
         <button class="btn btn-outline" onclick="cancelEdit()">Cancel</button>
@@ -249,6 +241,13 @@
       const sel = document.getElementById('pref-currency');
       const opt = sel.options[sel.selectedIndex];
       document.getElementById('currency-badge').textContent = opt.dataset.symbol + ' ' + opt.value;
+    }
+
+    // Saves instantly when toggle is clicked — no Edit needed
+    function saveEmotionPref() {
+      const on = document.getElementById('pref-emotion').checked;
+      localStorage.setItem('ic_default_emotion', on ? 'neutral' : '');
+      showToast(on ? '✅ Emotion auto-fill enabled' : 'Emotion auto-fill disabled');
     }
 
     function startEditing() {
@@ -296,6 +295,10 @@
         if (sel.options[i].value === origCurrency) { sel.selectedIndex = i; break; }
       }
       updateCurrencyBadge();
+
+      // Load saved emotion toggle state (no 'checked' hardcoded in HTML)
+      const savedEmotion = localStorage.getItem('ic_default_emotion');
+      document.getElementById('pref-emotion').checked = savedEmotion === 'neutral';
 
       // Initial state — hide save/cancel, show logout
       document.getElementById('profile-btns').style.display = 'none';
