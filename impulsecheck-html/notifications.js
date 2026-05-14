@@ -136,11 +136,11 @@
     const dropdown = document.getElementById('notif-dropdown');
     if (!dropdown) return;
     const isOpen = dropdown.classList.contains('open');
-    // Close all other dropdowns first
     document.querySelectorAll('.notif-dropdown.open').forEach(d => d.classList.remove('open'));
     if (!isOpen) {
       dropdown.classList.add('open');
-      loadNotifications(); // refresh on open
+      loadNotifications();
+      setTimeout(() => markAllRead(), 1500);
     }
   };
 
