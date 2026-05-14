@@ -7,12 +7,12 @@ async function sendReport(req, res) {
     const period = req.body.period || 'monthly';
 
     // ── Get user info ──
-    const userResult = await db.query(
+    const [userRows] = await db.query(
       'SELECT full_name, email, currency FROM users WHERE id = $1',
       [userId]
     );
-    if (userResult.rows.length === 0) return res.status(404).json({ error: 'User not found.' });
-    const user = userResult.rows[0];
+    if (userRows.length === 0) return res.status(404).json({ error: 'User not found.' });
+    const user = userRows[0];
 
     // ── Date range — PostgreSQL syntax ──
     let dateFilter;
@@ -24,14 +24,13 @@ async function sendReport(req, res) {
     }
 
     // ── Get purchases for period ──
-    const purchasesResult = await db.query(
+    const [purchases] = await db.query(
       `SELECT item_name, price, category, user_decision, created_at
        FROM purchases
        WHERE user_id = $1 ${dateFilter}
        ORDER BY created_at DESC`,
       [userId]
     );
-    const purchases = purchasesResult.rows;
 
     // ── Compute stats ──
     const totalSpent      = purchases.reduce((s, p) => s + parseFloat(p.price), 0);
