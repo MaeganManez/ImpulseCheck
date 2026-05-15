@@ -54,12 +54,24 @@
     .empty-state .btn { max-width: 260px; margin: 0 auto; }
     .act-header {
       display: grid;
-      grid-template-columns: 1fr auto auto;
+      grid-template-columns: 1fr auto auto auto;
       gap: 16px;
       padding: 13px 20px;
       font-size: 13px; font-weight: 700; color: var(--text);
       border-bottom: 1.5px solid var(--border);
     }
+    .delete-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: #ef4444;
+      font-size: 16px;
+      padding: 0 4px;
+      line-height: 1;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .delete-btn:hover { opacity: 1; }
     @media (max-width: 640px) {
       .budget-row   { flex-direction: column; }
       .budget-boxes { flex-direction: row; }
@@ -132,6 +144,23 @@
       return map[outcome] || '';
     }
 
+    // ── DELETE PURCHASE ──────────────────────────────────────
+    async function deletePurchase(id) {
+      if (!confirm('Delete this purchase?')) return;
+      try {
+        await Purchases.delete(id);
+        // Also remove from localStorage so fallback stays in sync
+        const local = JSON.parse(localStorage.getItem('ic_activity') || '[]');
+        localStorage.setItem('ic_activity', JSON.stringify(local.filter(p => p.id !== id)));
+        showToast('Purchase deleted.');
+        loadDashboard(); // reload fresh from DB
+      } catch (err) {
+        console.error('Delete error:', err);
+        showToast('Could not delete. Try again.');
+      }
+    }
+
+    // ── RENDER ACTIVITY ──────────────────────────────────────
     function renderActivity(purchases) {
       const section = document.getElementById('activity-section');
       if (!purchases || purchases.length === 0) {
@@ -151,12 +180,14 @@
           <span class="row-name">${a.item_name || a.name}</span>
           <span class="row-price">${fmt(parseFloat(a.price))}</span>
           <span class="row-outcome">${tagHTML(a.user_decision || a.outcome)}</span>
+          <button class="delete-btn" onclick="deletePurchase(${a.id})" title="Delete">🗑</button>
         </div>`).join('');
       section.innerHTML = `
-        <div class="act-header"><span>Recent Activity</span><span></span><span></span></div>
+        <div class="act-header"><span>Recent Activity</span><span></span><span></span><span></span></div>
         ${rows}`;
     }
 
+    // ── LOAD DASHBOARD ───────────────────────────────────────
     async function loadDashboard() {
       try {
         // Load budget from DB
@@ -167,7 +198,6 @@
           budgetAmount = parseFloat(budgetData.budget.amount) || 0;
           localStorage.setItem('ic_budget', budgetAmount);
         } else {
-          // fallback to localStorage
           budgetAmount = parseFloat(localStorage.getItem('ic_budget') || '0');
         }
 
@@ -190,12 +220,11 @@
             }))
           ));
         } else {
-          // fallback to localStorage
           const local = JSON.parse(localStorage.getItem('ic_activity') || '[]');
           purchases = local.map(p => ({ item_name: p.name, price: p.price, user_decision: p.outcome }));
         }
 
-        // Calculate spent from current month purchases
+        // Calculate spent from current month
         const now = new Date();
         const thisMonth = purchases.filter(p => {
           const d = new Date(p.created_at || p.date);
@@ -220,7 +249,6 @@
 
       } catch (err) {
         console.error('Dashboard load error:', err);
-        // Fallback to localStorage
         const ACTIVITY  = JSON.parse(localStorage.getItem('ic_activity') || '[]');
         const BUDGET    = parseFloat(localStorage.getItem('ic_budget') || '0');
         const spent     = ACTIVITY.reduce((s, a) => s + a.price, 0);
