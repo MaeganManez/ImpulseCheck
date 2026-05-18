@@ -469,15 +469,6 @@
     function hideError() { document.getElementById('error-banner').style.display = 'none'; }
     document.addEventListener('keydown', e => { if (e.key === 'Enter') handleRegister(); });
 
-    // Show context message if coming from a scanned QR link
-    if (new URLSearchParams(window.location.search).get('ref') === 'qr') {
-      const b = document.getElementById('error-banner');
-      b.textContent = "You scanned someone else's QR code. Create your own account to use ImpulseCheck, then get your own QR from your Profile.";
-      b.style.display = 'block';
-      b.style.background = '#e8f4fd';
-      b.style.color = '#1a6b8a';
-      b.style.border = '1px solid #b3d9ee';
-    }
   </script>
 </body>
 </html>

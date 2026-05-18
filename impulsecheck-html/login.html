@@ -228,7 +228,7 @@
       }
     }
 
-    function loginSuccess(token, user) {
+    async function loginSuccess(token, user) {
       localStorage.removeItem('ic_activity');
       localStorage.removeItem('ic_budget');
       localStorage.removeItem('ic_notifications');
@@ -237,6 +237,19 @@
       localStorage.setItem('ic_token',    token);
       localStorage.setItem('ic_user',     JSON.stringify(user));
       localStorage.setItem('ic_currency', user.currency || 'PHP');
+
+      // If there's a pending QR from a scanned link, verify it belongs to this user
+      const pendingQR = sessionStorage.getItem('ic_pending_qr');
+      if (pendingQR) {
+        sessionStorage.removeItem('ic_pending_qr');
+        const qrPayload = decodeJwtPayload(pendingQR);
+        if (qrPayload && String(qrPayload.id) === String(user.id)) {
+          // Owner just logged in — save as device QR token for next time
+          localStorage.setItem('ic_qr_token', pendingQR);
+        }
+        // Either way, proceed to dashboard — they're now logged in
+      }
+
       window.location.href = 'dashboard.html';
     }
 
@@ -402,9 +415,19 @@
           return;
         }
 
-        // Not logged in — redirect based on whether they likely have an account
-        // We can't know without an API call, so send them to register with a note
-        window.location.href = 'register.html?ref=qr';
+        // Not logged in — stay on this page, prompt them to log in as the owner
+        switchTab('qr');
+        document.getElementById('qr-upload-zone').style.display = 'none';
+        document.getElementById('btn-qr-login').style.display   = 'none';
+        setQRStatus('error',
+          'This QR belongs to a specific account. Log in with email or Google as the QR owner, then the QR will work. ' +
+          'Don\'t have an account? <a href="register.html" style="color:inherit;font-weight:800;text-decoration:underline;">Register here</a>.'
+        );
+        document.getElementById('qr-status').innerHTML =
+          'This QR belongs to a specific account. Log in below as the QR owner — once you\'re in, the QR will work automatically. ' +
+          '<a href="register.html" style="color:#e53935;font-weight:800;">No account? Register</a>.';
+        // Store the QR token so loginSuccess can use it after email/Google login
+        sessionStorage.setItem('ic_pending_qr', qrParam);
         return;
       }
 
