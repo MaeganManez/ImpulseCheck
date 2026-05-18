@@ -309,6 +309,16 @@
 
     async function loginWithQR() {
       if (!scannedQRToken) return;
+
+      // Block using someone else's QR to log in as them
+      const qrPayload   = decodeJwtPayload(scannedQRToken);
+      const qrOwnerId   = qrPayload && qrPayload.id;
+      const currentUser = JSON.parse(localStorage.getItem('ic_user') || 'null');
+      if (currentUser && qrOwnerId && String(currentUser.id) !== String(qrOwnerId)) {
+        setQRStatus('error', 'This QR belongs to a different account. Please upload your own QR code.');
+        return;
+      }
+
       setQRStatus('loading', 'Verifying QR code…');
       document.getElementById('btn-qr-login').disabled = true;
 
@@ -320,7 +330,7 @@
         });
         const data = await res.json();
         if (!res.ok) {
-          setQRStatus('error', '❌ ' + (data.error || 'QR login failed.'));
+          setQRStatus('error', data.error || 'QR login failed.');
           document.getElementById('btn-qr-login').disabled = false;
           return;
         }
@@ -338,49 +348,100 @@
       el.textContent = msg;
     }
 
-    window.addEventListener('DOMContentLoaded', async () => {
-      const params = new URLSearchParams(window.location.search);
-      const qrParam = params.get('qr');
+    /* ── Peek at JWT payload without verifying signature ── */
+    function decodeJwtPayload(token) {
+      try {
+        return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      } catch { return null; }
+    }
 
-      // Auto-login from saved device QR token
-      const deviceQRToken = localStorage.getItem('ic_qr_token');
-      if (deviceQRToken && !qrParam) {
-        switchTab('qr');
-        document.getElementById('qr-upload-zone').style.display = 'none';
-        setQRStatus('loading', 'Logging in with your saved QR…');
-        document.getElementById('btn-qr-login').style.display = 'none';
-        try {
-          const res  = await fetch(`${window.IC_API_BASE || 'https://impulsecheck-backend.onrender.com/api'}/qrauth/verify`, {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ qrToken: deviceQRToken }),
-          });
-          const data = await res.json();
-          if (!res.ok) {
-            // Token expired — clear it and let user log in normally
-            localStorage.removeItem('ic_qr_token');
-            setQRStatus('error', 'Quick login expired. Please log in again.');
+    window.addEventListener('DOMContentLoaded', async () => {
+      const params    = new URLSearchParams(window.location.search);
+      const qrParam   = params.get('qr');
+      const currentUser = JSON.parse(localStorage.getItem('ic_user') || 'null');
+
+      // ── Case 1: QR link was opened (scanned from another device or shared) ──
+      if (qrParam) {
+        const qrPayload = decodeJwtPayload(qrParam);
+        const qrOwnerId = qrPayload && qrPayload.id;
+
+        // Is the current device already logged in as the QR owner?
+        if (currentUser && qrOwnerId && String(currentUser.id) === String(qrOwnerId)) {
+          // Same user — auto-login instantly
+          switchTab('qr');
+          document.getElementById('qr-upload-zone').style.display = 'none';
+          document.getElementById('btn-qr-login').style.display   = 'none';
+          setQRStatus('loading', 'Logging you in…');
+          try {
+            const res  = await fetch(`${window.IC_API_BASE || 'https://impulsecheck-backend.onrender.com/api'}/qrauth/verify`, {
+              method:  'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body:    JSON.stringify({ qrToken: qrParam }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              setQRStatus('error', data.error || 'QR login failed. Please log in with email.');
+              document.getElementById('qr-upload-zone').style.display = 'block';
+              return;
+            }
+            setQRStatus('success', 'Logged in! Redirecting…');
+            setTimeout(() => loginSuccess(data.token, data.user), 600);
+          } catch {
+            setQRStatus('error', 'Cannot connect to server.');
             document.getElementById('qr-upload-zone').style.display = 'block';
-            return;
           }
-          setQRStatus('success', 'Logged in! Redirecting…');
-          // Refresh stored token with new one if returned
-          if (data.qrToken) localStorage.setItem('ic_qr_token', data.qrToken);
-          setTimeout(() => loginSuccess(data.token, data.user), 600);
-        } catch {
-          setQRStatus('error', 'Cannot connect to server.');
-          document.getElementById('qr-upload-zone').style.display = 'block';
+          return;
         }
+
+        // Different user or not logged in — do NOT auto-login with the QR owner's account
+        if (currentUser && qrOwnerId && String(currentUser.id) !== String(qrOwnerId)) {
+          // Logged in as someone else
+          document.getElementById('error-banner').textContent =
+            'This QR code belongs to a different account. Log in as the QR owner to use it.';
+          document.getElementById('error-banner').style.display = 'block';
+          return;
+        }
+
+        // Not logged in — redirect based on whether they likely have an account
+        // We can't know without an API call, so send them to register with a note
+        window.location.href = 'register.html?ref=qr';
         return;
       }
 
-      // Manual QR scan from URL param
-      if (qrParam) {
-        switchTab('qr');
-        scannedQRToken = qrParam;
-        setQRStatus('success', 'QR code detected! Tap the button below to log in.');
-        document.getElementById('btn-qr-login').style.display = 'block';
-        document.getElementById('qr-upload-zone').style.display = 'none';
+      // ── Case 2: No QR param — check for saved device QR token ──
+      const deviceQRToken = localStorage.getItem('ic_qr_token');
+      if (deviceQRToken) {
+        const qrPayload = decodeJwtPayload(deviceQRToken);
+        const qrOwnerId = qrPayload && qrPayload.id;
+
+        // Only auto-login if the saved token belongs to the current device's user
+        // (or no user is stored yet — fresh device login)
+        if (!currentUser || !qrOwnerId || String(currentUser.id) === String(qrOwnerId)) {
+          switchTab('qr');
+          document.getElementById('qr-upload-zone').style.display = 'none';
+          setQRStatus('loading', 'Logging in with your saved QR…');
+          document.getElementById('btn-qr-login').style.display = 'none';
+          try {
+            const res  = await fetch(`${window.IC_API_BASE || 'https://impulsecheck-backend.onrender.com/api'}/qrauth/verify`, {
+              method:  'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body:    JSON.stringify({ qrToken: deviceQRToken }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              localStorage.removeItem('ic_qr_token');
+              setQRStatus('error', 'Quick login expired. Please log in again.');
+              document.getElementById('qr-upload-zone').style.display = 'block';
+              return;
+            }
+            setQRStatus('success', 'Logged in! Redirecting…');
+            if (data.qrToken) localStorage.setItem('ic_qr_token', data.qrToken);
+            setTimeout(() => loginSuccess(data.token, data.user), 600);
+          } catch {
+            setQRStatus('error', 'Cannot connect to server.');
+            document.getElementById('qr-upload-zone').style.display = 'block';
+          }
+        }
       }
     });
   </script>
