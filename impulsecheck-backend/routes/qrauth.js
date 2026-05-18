@@ -27,7 +27,7 @@ router.get('/my-qr', async (req, res) => {
       { expiresIn: '30d' }
     );
 
-    const qrUrl = `https://cozy-bienenstitch-7eef5a.netlify.app/login.html?qr=${qrToken}`;
+    const qrUrl = `${process.env.FRONTEND_URL}/login.html?qr=${qrToken}`;
     return res.json({ qrToken, qrUrl });
   } catch (err) {
     console.error('QR my-qr error:', err);

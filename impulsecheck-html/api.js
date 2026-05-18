@@ -5,7 +5,7 @@
      <script src="api.js"></script>
    ============================================================ */
 
-const API_BASE = 'https://impulsecheck-backend.onrender.com/api';
+const API_BASE = window.IC_API_BASE || 'https://impulsecheck-backend.onrender.com/api';
 
 /* ════════════════════════════════════════
    TOKEN HELPERS

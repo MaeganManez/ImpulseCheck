@@ -43,7 +43,7 @@ passport.deserializeUser((user, done) => done(null, user));
 passport.use(new GoogleStrategy({
   clientID:     process.env.GOOGLE_CLIENT_ID,
   clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL:  'https://impulsecheck-backend.onrender.com/auth/google/callback',
+  callbackURL:  `${process.env.BACKEND_URL}/auth/google/callback`,
 }, async (accessToken, refreshToken, profile, done) => {
   try {
     const email     = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
@@ -90,7 +90,7 @@ app.get('/auth/google',
 );
 
 app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: 'https://cozy-bienenstitch-7eef5a.netlify.app/login.html?error=google_failed' }),
+  passport.authenticate('google', { failureRedirect: `${process.env.FRONTEND_URL}/login.html?error=google_failed` }),
   (req, res) => {
     const user  = req.user;
     const token = jwt.sign(
@@ -105,7 +105,7 @@ app.get('/auth/google/callback',
       email:     user.email,
       currency:  user.currency || 'PHP',
     });
-    res.redirect(`https://cozy-bienenstitch-7eef5a.netlify.app/oauth-callback.html?${params}`);
+    res.redirect(`${process.env.FRONTEND_URL}/oauth-callback.html?${params}`);
   }
 );
 

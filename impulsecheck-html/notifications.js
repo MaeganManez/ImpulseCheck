@@ -6,7 +6,7 @@
    ============================================================ */
 
 (function () {
-  const API = 'https://impulsecheck-backend.onrender.com/api';
+  const API = window.IC_API_BASE || 'https://impulsecheck-backend.onrender.com/api';
 
   /* ── Find the topbar-right and inject the bell ── */
   function injectBell() {
