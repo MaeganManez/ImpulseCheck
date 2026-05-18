@@ -380,29 +380,12 @@
 
         // Is the current device already logged in as the QR owner?
         if (currentUser && qrOwnerId && String(currentUser.id) === String(qrOwnerId)) {
-          // Same user — auto-login instantly
+          // Same user — show confirm button
           switchTab('qr');
           document.getElementById('qr-upload-zone').style.display = 'none';
-          document.getElementById('btn-qr-login').style.display   = 'none';
-          setQRStatus('loading', 'Logging you in…');
-          try {
-            const res  = await fetch(`${window.IC_API_BASE || 'https://impulsecheck-backend.onrender.com/api'}/qrauth/verify`, {
-              method:  'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body:    JSON.stringify({ qrToken: qrParam }),
-            });
-            const data = await res.json();
-            if (!res.ok) {
-              setQRStatus('error', data.error || 'QR login failed. Please log in with email.');
-              document.getElementById('qr-upload-zone').style.display = 'block';
-              return;
-            }
-            setQRStatus('success', 'Logged in! Redirecting…');
-            setTimeout(() => loginSuccess(data.token, data.user), 600);
-          } catch {
-            setQRStatus('error', 'Cannot connect to server.');
-            document.getElementById('qr-upload-zone').style.display = 'block';
-          }
+          setQRStatus('success', 'QR code recognised. Tap the button below to log in.');
+          scannedQRToken = qrParam;
+          document.getElementById('btn-qr-login').style.display = 'block';
           return;
         }
 
