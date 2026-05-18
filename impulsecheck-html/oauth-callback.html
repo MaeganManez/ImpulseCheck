@@ -43,9 +43,9 @@
   <script src="config.js"></script>
   <script>
     (async () => {
-      const supabase = window.supabase.createClient(window.IC_SUPABASE_URL, window.IC_SUPABASE_ANON_KEY);
+      const supabaseClient = window.supabase.createClient(window.IC_SUPABASE_URL, window.IC_SUPABASE_ANON_KEY);
 
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
 
       if (error || !session) {
         document.getElementById('cb-title').textContent = 'Sign-in failed';

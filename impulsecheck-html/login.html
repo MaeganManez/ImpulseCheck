@@ -190,13 +190,13 @@
     let scannedQRToken = null;
 
     /* ── SUPABASE GOOGLE LOGIN ── */
-    const supabase = window.supabase.createClient(window.IC_SUPABASE_URL, window.IC_SUPABASE_ANON_KEY);
+    const supabaseClient = window.supabase.createClient(window.IC_SUPABASE_URL, window.IC_SUPABASE_ANON_KEY);
 
     async function signInWithGoogle() {
       const btn = document.getElementById('btn-google');
       btn.disabled = true;
       btn.textContent = 'Redirecting…';
-      await supabase.auth.signInWithOAuth({
+      await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
         options: { redirectTo: window.location.origin + '/oauth-callback.html' },
       });
