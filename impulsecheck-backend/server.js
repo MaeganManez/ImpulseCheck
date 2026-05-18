@@ -1,10 +1,7 @@
-const express  = require('express');
-const cors     = require('cors');
-const passport = require('passport');
-const session  = require('express-session');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const jwt      = require('jsonwebtoken');
-const db       = require('./config/db');
+const express = require('express');
+const cors    = require('cors');
+const jwt     = require('jsonwebtoken');
+const db      = require('./config/db');
 require('dotenv').config();
 
 if (!globalThis.fetch) {
@@ -26,32 +23,30 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '5mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-/* ── SESSION (needed for passport OAuth flow only) ── */
-app.use(session({
-  secret: process.env.JWT_SECRET || 'impulsecheck-session-secret',
-  resave: false,
-  saveUninitialized: false,
-}));
-
-/* ── PASSPORT ── */
-app.use(passport.initialize());
-app.use(passport.session());
-
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((user, done) => done(null, user));
-
-passport.use(new GoogleStrategy({
-  clientID:     process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  callbackURL:  `${process.env.BACKEND_URL}/auth/google/callback`,
-}, async (accessToken, refreshToken, profile, done) => {
+/* ── SUPABASE GOOGLE AUTH ── */
+app.post('/api/auth/google-supabase', async (req, res) => {
   try {
-    const email     = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
-    if (!email) return done(new Error('No email returned from Google'), null);
-    const full_name = profile.displayName;
-    const google_id = profile.id;
+    const { access_token } = req.body;
+    if (!access_token) return res.status(400).json({ error: 'Missing access_token.' });
 
-    // Check if user exists — destructure [rows] from db.query
+    // Verify token with Supabase and get user info
+    const supaRes = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+        apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
+      },
+    });
+
+    if (!supaRes.ok) return res.status(401).json({ error: 'Invalid Supabase token.' });
+
+    const supaUser = await supaRes.json();
+    const email     = supaUser.email;
+    const full_name = supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || email.split('@')[0];
+    const google_id = supaUser.id;
+
+    if (!email) return res.status(400).json({ error: 'No email from Supabase.' });
+
+    // Upsert user in your own DB
     const [existingRows] = await db.query(
       'SELECT id, full_name, email, currency FROM users WHERE email = $1',
       [email]
@@ -61,16 +56,14 @@ passport.use(new GoogleStrategy({
     if (existingRows.length > 0) {
       user = existingRows[0];
     } else {
-      // Create new user
       const [newRows] = await db.query(
         `INSERT INTO users (full_name, username, email, password_hash, is_verified, currency)
          VALUES ($1, $2, $3, $4, 1, 'PHP')
          RETURNING id, full_name, email, currency`,
-        [full_name, email.split('@')[0], email, 'GOOGLE_OAUTH_' + google_id]
+        [full_name, email.split('@')[0], email, 'SUPABASE_GOOGLE_' + google_id]
       );
       user = newRows[0];
 
-      // Create preferences + welcome notification
       await db.query('INSERT INTO user_preferences (user_id) VALUES ($1)', [user.id]);
       await db.query(
         `INSERT INTO notifications (user_id, title, message, type) VALUES ($1, $2, $3, $4)`,
@@ -78,36 +71,18 @@ passport.use(new GoogleStrategy({
       );
     }
 
-    return done(null, user);
-  } catch (err) {
-    return done(err, null);
-  }
-}));
-
-/* ── GOOGLE AUTH ROUTES ── */
-app.get('/auth/google',
-  passport.authenticate('google', { scope: ['profile', 'email'] })
-);
-
-app.get('/auth/google/callback',
-  passport.authenticate('google', { failureRedirect: `${process.env.FRONTEND_URL}/login.html?error=google_failed` }),
-  (req, res) => {
-    const user  = req.user;
     const token = jwt.sign(
       { id: user.id, email: user.email, full_name: user.full_name },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    const params = new URLSearchParams({
-      token,
-      id:        user.id,
-      full_name: user.full_name,
-      email:     user.email,
-      currency:  user.currency || 'PHP',
-    });
-    res.redirect(`${process.env.FRONTEND_URL}/oauth-callback.html?${params}`);
+
+    return res.json({ token, user });
+  } catch (err) {
+    console.error('Supabase Google auth error:', err);
+    return res.status(500).json({ error: 'Internal server error.' });
   }
-);
+});
 
 /* ── API ROUTES ── */
 app.use('/api/auth',          require('./routes/auth'));

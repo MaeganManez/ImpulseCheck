@@ -38,34 +38,50 @@
       <p id="cb-msg">Please wait a moment.</p>
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
   <script>
-    const params   = new URLSearchParams(window.location.search);
-    const token    = params.get('token');
-    const error    = params.get('error');
+    (async () => {
+      const supabase = window.supabase.createClient(window.IC_SUPABASE_URL, window.IC_SUPABASE_ANON_KEY);
 
-    if (error || !token) {
-      document.getElementById('cb-title').textContent = 'Sign-in failed';
-      document.getElementById('cb-msg').innerHTML = '<span class="cb-error">Google sign-in was cancelled or failed.<br/>Please try again.</span>';
-      setTimeout(() => window.location.href = 'login.html', 3000);
-    } else {
-      const user = {
-        id:        params.get('id'),
-        full_name: params.get('full_name'),
-        email:     params.get('email'),
-        currency:  params.get('currency') || 'PHP',
-      };
-      // Clear previous account's local data
-      localStorage.removeItem('ic_activity');
-      localStorage.removeItem('ic_budget');
-      localStorage.removeItem('ic_notifications');
-      localStorage.removeItem('ic_categories');
+      const { data: { session }, error } = await supabase.auth.getSession();
 
-      localStorage.setItem('ic_token',    token);
-      localStorage.setItem('ic_user',     JSON.stringify(user));
-      localStorage.setItem('ic_currency', user.currency);
-      sessionStorage.setItem('toast_msg', '✅ Signed in with Google!');
-      window.location.href = 'dashboard.html';
-    }
+      if (error || !session) {
+        document.getElementById('cb-title').textContent = 'Sign-in failed';
+        document.getElementById('cb-msg').innerHTML = '<span class="cb-error">Google sign-in was cancelled or failed.<br/>Please try again.</span>';
+        setTimeout(() => window.location.href = 'login.html', 3000);
+        return;
+      }
+
+      try {
+        const res  = await fetch(`${window.IC_API_BASE}/auth/google-supabase`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ access_token: session.access_token }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || 'Auth failed');
+
+        localStorage.removeItem('ic_activity');
+        localStorage.removeItem('ic_budget');
+        localStorage.removeItem('ic_notifications');
+        localStorage.removeItem('ic_categories');
+        localStorage.removeItem('ic_budget_data');
+
+        localStorage.setItem('ic_token',    data.token);
+        localStorage.setItem('ic_user',     JSON.stringify(data.user));
+        localStorage.setItem('ic_currency', data.user.currency || 'PHP');
+
+        sessionStorage.setItem('toast_msg', '✅ Signed in with Google!');
+        window.location.href = 'dashboard.html';
+      } catch (err) {
+        document.getElementById('cb-title').textContent = 'Sign-in failed';
+        document.getElementById('cb-msg').innerHTML = `<span class="cb-error">${err.message}</span>`;
+        setTimeout(() => window.location.href = 'login.html', 3000);
+      }
+    })();
   </script>
 </body>
 </html>
