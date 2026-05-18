@@ -256,7 +256,6 @@
       </div>
       <div class="loading-card-body">
         <div class="loading-item-preview" id="loading-item-preview">
-          <div class="lip-emoji" id="loading-emoji">🛍️</div>
           <div>
             <div class="lip-name" id="loading-name">—</div>
             <div class="lip-meta" id="loading-meta">—</div>
@@ -301,10 +300,9 @@
       </div>
       <div class="ai-result-body">
         <div id="fallback-notice" style="display:none;">
-          <div class="fallback-badge">⚡ Quick analysis</div>
+          <div class="fallback-badge">Quick analysis</div>
         </div>
         <div class="ai-item-row">
-          <div class="ai-item-emoji" id="item-emoji">🛍️</div>
           <div class="ai-item-info">
             <strong id="item-name-display"></strong>
             <span id="item-meta"></span>
@@ -316,11 +314,11 @@
         </div>
         <hr class="ai-divider" />
         <div class="ai-section">
-          <div class="ai-section-label">💬 Advice</div>
+          <div class="ai-section-label">Advice</div>
           <div class="ai-advice-box" id="result-advice"></div>
         </div>
         <div class="ai-section">
-          <div class="ai-section-label">💡 Better Alternative</div>
+          <div class="ai-section-label">Better Alternative</div>
           <div class="ai-alt-box">
             <div class="ai-alt-icon">→</div>
             <div id="result-alternative"></div>
@@ -328,22 +326,21 @@
         </div>
         <hr class="ai-divider" />
         <div class="decision-row">
-          <button class="btn btn-buy"   onclick="decide('BUY')">✅ Save as Buy</button>
-          <button class="btn btn-delay" onclick="decide('WAIT')">⏳ Save as Delayed</button>
-          <button class="btn btn-avoid" onclick="decide('AVOID')">🚫 Save as Avoided</button>
+          <button class="btn btn-buy"   onclick="decide('BUY')">Save as Buy</button>
+          <button class="btn btn-delay" onclick="decide('WAIT')">Save as Delayed</button>
+          <button class="btn btn-avoid" onclick="decide('AVOID')">Save as Avoided</button>
         </div>
       </div>
     </div>
 
     <div class="scanner-wrap" id="scanner-wrap" style="display:none;">
       <button class="scanner-toggle" onclick="toggleScanner()">
-        <span style="font-size:20px;">📷</span>
         Scan a product image instead
         <span style="margin-left:auto;font-size:18px;" id="scanner-chevron">▾</span>
       </button>
       <div class="scanner-card" id="scanner-card">
         <div class="scanner-header">
-          <div class="scanner-header-icon">📷</div>
+          <div class="scanner-header-icon"></div>
           <div class="scanner-header-text">
             <h3>Product Image Scanner</h3>
             <p>Take a photo or upload an image — identifies the product and scores impulse risk</p>
@@ -353,13 +350,13 @@
           <img id="scan-preview" alt="Product to scan" />
           <div class="upload-zone" id="upload-zone">
             <input type="file" id="scan-image-input" accept="image/*" capture="environment" onchange="handleScanImage(event)" />
-            <div class="upload-zone-icon">🖼️</div>
+            <div class="upload-zone-icon"></div>
             <p>Tap to upload or <strong>take a photo</strong></p>
             <p style="margin-top:4px;font-size:12px;">JPG, PNG, WEBP · max 5 MB</p>
           </div>
           <button class="btn btn-buy" id="scan-btn"
             style="width:100%;margin:0;padding:13px;font-size:14px;display:none;"
-            onclick="runScan()">✨ Analyze Product</button>
+            onclick="runScan()">Analyze Product</button>
           <div class="scan-loader" id="scan-loader">
             <div class="spinner"></div>
             <p style="margin:0;font-size:14px;font-weight:700;color:var(--green-dark);">Identifying product…</p>
@@ -367,7 +364,6 @@
           </div>
           <div class="scan-result-area" id="scan-result-area">
             <div class="scan-result-banner" id="srb-banner">
-              <div class="srb-icon" id="srb-icon">🛍️</div>
               <div>
                 <p class="srb-name" id="srb-name">—</p>
                 <p class="srb-meta" id="srb-meta">—</p>
@@ -383,9 +379,9 @@
               <div class="risk-bar-top"><span>Impulse risk</span><span id="sic-risk-label">—</span></div>
               <div class="risk-bar-track"><div class="risk-bar-fill" id="risk-bar-fill" style="width:0%"></div></div>
             </div>
-            <div class="ai-section-label" style="margin-bottom:8px;">💬 Intervention</div>
+            <div class="ai-section-label" style="margin-bottom:8px;">Intervention</div>
             <div class="scan-message" id="scan-message">—</div>
-            <div class="ai-section-label" style="margin-bottom:8px;">💡 Alternatives</div>
+            <div class="ai-section-label" style="margin-bottom:8px;">Alternatives</div>
             <div class="scan-alts" id="scan-alts"></div>
             <button class="scan-autofill-btn" onclick="autofillPurchase()">➜ Use this product in a Purchase Check</button>
           </div>
@@ -402,16 +398,10 @@
     if (!pending) { window.location.href = 'dashboard.html'; }
 
     const colorMap = { AVOID: '#e53935', WAIT: '#f0a830', BUY: '#2eaa7e' };
-    const iconMap  = { AVOID: '🚫', WAIT: '⏳', BUY: '✅' };
-    const categoryEmoji = {
-      food: '🍔', clothing: '👗', electronics: '📱', health: '💊',
-      entertainment: '🎮', transport: '🚗', education: '📚',
-      beauty: '💄', sports: '⚽', home: '🏠', others: '🛍️',
-    };
+    const iconMap  = { AVOID: '×', WAIT: '…', BUY: '✓' };
 
     if (pending) {
-      const emoji = categoryEmoji[(pending.category || '').toLowerCase()] || '🛍️';
-      document.getElementById('loading-emoji').textContent = emoji;
+      document.getElementById('loading-emoji').textContent = '';
       document.getElementById('loading-name').textContent  = pending.name;
       document.getElementById('loading-meta').textContent  =
         fmt(parseFloat(pending.price), true) + ' · ' + (pending.category || 'General');
@@ -450,12 +440,11 @@
 
     function showResult(rec, isFallback) {
       const color = colorMap[rec.tag];
-      const emoji = categoryEmoji[(pending.category || '').toLowerCase()] || '🛍️';
       document.getElementById('result-banner').style.background = color;
       document.getElementById('banner-icon').textContent  = iconMap[rec.tag];
       document.getElementById('banner-title').textContent = rec.title;
       document.getElementById('banner-subtitle').textContent = rec.subtitle;
-      document.getElementById('item-emoji').textContent = emoji;
+      document.getElementById('item-emoji').textContent = '';
       document.getElementById('item-name-display').textContent = pending.name;
       document.getElementById('item-meta').textContent =
         `${fmt(parseFloat(pending.price), true)} · ${pending.category || 'General'} · Feeling: ${pending.emotion || 'Not specified'}`;
@@ -546,11 +535,11 @@
               .reduce((s, p) => s + parseFloat(p.price), 0);
             const remaining = budgetAmount - thisMonthSpent;
             if (remaining <= 0) {
-              alert('⚠️ Budget Exceeded!\n\nYou have no remaining budget for this month. Please set a new budget or save this as Avoided/Delayed instead.');
+              alert('Budget Exceeded!\n\nYou have no remaining budget for this month. Please set a new budget or save this as Avoided/Delayed instead.');
               return;
             }
             if (parseFloat(pending.price) > remaining) {
-              const confirmed = confirm(`⚠️ Over Budget!\n\nThis purchase (${fmt(parseFloat(pending.price), true)}) exceeds your remaining budget (${fmt(remaining, true)}).\n\nDo you still want to proceed?`);
+              const confirmed = confirm(`Over Budget!\n\nThis purchase (${fmt(parseFloat(pending.price), true)}) exceeds your remaining budget (${fmt(remaining, true)}).\n\nDo you still want to proceed?`);
               if (!confirmed) return;
             }
           }
@@ -571,18 +560,18 @@
         });
       } catch (err) {
         console.error('Save purchase error:', err.message);
-        alert('⚠️ Could not save to database: ' + err.message);
+        alert('Could not save to database: ' + err.message);
       }
       saveToLocalStorage(pending.name, pending.price, pending.category, outcome, aiTag);
       sessionStorage.removeItem('ic_pending');
       const msgs = {
-        BUY:   '✅ Purchase saved as Buy!',
-        WAIT:  '⏳ Saved as Delayed — good thinking!',
-        AVOID: '🚫 Great choice — purchase avoided!',
+        BUY:   'Purchase saved as Buy!',
+        WAIT:  'Saved as Delayed — good thinking!',
+        AVOID: 'Great choice — purchase avoided!',
       };
       sessionStorage.setItem('toast_msg', msgs[outcome]);
       if (typeof addLocalNotification === 'function') {
-        const titles = { BUY: '🛒 Purchase Recorded', WAIT: '⏳ Purchase Delayed', AVOID: '🚫 Purchase Avoided' };
+        const titles = { BUY: 'Purchase Recorded', WAIT: 'Purchase Delayed', AVOID: 'Purchase Avoided' };
         const notifMsgs = {
           BUY:   `You bought ${pending.name} for ${fmt(parseFloat(pending.price), true)}.`,
           WAIT:  `You delayed buying ${pending.name}. Revisit when you are sure.`,
@@ -656,8 +645,7 @@
       banner.style.background  = rc + '18';
       banner.style.borderLeft  = `4px solid ${rc}`;
       banner.style.borderRadius = 'var(--radius-sm)';
-      const catEmoji = { Electronics:'📱', Clothing:'👗', Food:'🍔', Beauty:'💄', Home:'🏠', Entertainment:'🎮', Sports:'⚽', Education:'📚', Other:'🛍️' };
-      document.getElementById('srb-icon').textContent      = catEmoji[d.category] || '🛍️';
+      document.getElementById('srb-icon').textContent      = '';
       document.getElementById('sic-category').textContent  = d.category || '—';
       document.getElementById('sic-need').textContent      = d.needVsWant || '—';
       document.getElementById('sic-score').textContent     = (d.impulseRiskScore ?? '—') + ' / 100';

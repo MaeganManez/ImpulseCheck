@@ -76,7 +76,7 @@
 
       <!-- NOT LOGGED IN STATE -->
       <div id="state-not-logged-in" style="display:none;">
-        <div class="qr-icon danger">🔒</div>
+        <div class="qr-icon danger"></div>
         <h2>Not Logged In</h2>
         <p class="subtitle">You need to be logged in on this device to approve a QR login.</p>
         <a href="login.html" class="btn btn-primary" style="display:block;text-decoration:none;">Go to Login</a>
@@ -84,7 +84,7 @@
 
       <!-- READY TO APPROVE STATE -->
       <div id="state-approve" style="display:none;">
-        <div class="qr-icon">📱</div>
+        <div class="qr-icon"></div>
         <h2>Approve Login?</h2>
         <p class="subtitle">Someone is trying to log in to ImpulseCheck on another device. Approve only if it's you.</p>
         <div class="user-card">
@@ -94,13 +94,13 @@
             <div class="user-email" id="approve-email">—</div>
           </div>
         </div>
-        <button class="btn-approve" id="approve-btn" onclick="approveLogin()">✅ Yes, Approve This Login</button>
+        <button class="btn-approve" id="approve-btn" onclick="approveLogin()">Yes, Approve This Login</button>
         <button class="btn-cancel" onclick="window.location.href='dashboard.html'">Cancel</button>
       </div>
 
       <!-- SUCCESS STATE -->
       <div id="state-success" style="display:none;">
-        <div class="qr-icon success">✅</div>
+        <div class="qr-icon success"></div>
         <h2>Login Approved!</h2>
         <p class="subtitle">The other device should now be logged in. You can close this page.</p>
         <button class="btn-cancel" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>
@@ -108,7 +108,7 @@
 
       <!-- ERROR STATE -->
       <div id="state-error" style="display:none;">
-        <div class="qr-icon danger">❌</div>
+        <div class="qr-icon danger"></div>
         <h2 id="error-title">Something went wrong</h2>
         <p class="subtitle" id="error-msg">—</p>
         <button class="btn-cancel" onclick="window.location.href='dashboard.html'">Back to Dashboard</button>

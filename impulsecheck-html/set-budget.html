@@ -142,7 +142,7 @@
           </div>
         </div>
         <div class="cat-error" id="cat-error" style="display:none;">
-          ⚠ Please select at least one category.
+          Please select at least one category.
         </div>
         <div class="field-hint">Select the categories you want to track this month.</div>
       </div>
@@ -260,9 +260,9 @@
       localStorage.setItem('ic_categories', JSON.stringify(selectedCategories));
       localStorage.setItem('ic_period',     document.getElementById('period-select').value);
 
-      sessionStorage.setItem('toast_msg', '✅ Budget set to ' + fmt(val, true));
+      sessionStorage.setItem('toast_msg', 'Budget set to ' + fmt(val, true));
       if (typeof addLocalNotification === 'function') {
-        addLocalNotification('💰 Budget Updated', 'Your monthly budget has been set to ' + fmt(val, true) + '.', 'budget');
+        addLocalNotification('Budget Updated', 'Your monthly budget has been set to ' + fmt(val, true) + '.', 'budget');
       }
       window.location.href = 'dashboard.html';
     }

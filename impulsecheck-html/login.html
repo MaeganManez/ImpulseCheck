@@ -159,7 +159,7 @@
 
         <div class="qr-upload-zone" id="qr-upload-zone">
           <input type="file" id="qr-file-input" accept="image/*" onchange="handleQRImage(event)" />
-          <div class="uz-icon">📷</div>
+          <div class="uz-icon"></div>
           <p><strong>Upload your QR code</strong></p>
           <p style="margin-top:4px;">Tap to choose from gallery or take a photo</p>
         </div>
@@ -167,7 +167,7 @@
         <div class="qr-status" id="qr-status"></div>
 
         <button class="btn-qr-login" id="btn-qr-login" onclick="loginWithQR()">
-          🔓 Log In with QR
+          Log In with QR
         </button>
 
         <p class="qr-hint">
@@ -290,16 +290,16 @@
               const token  = url.searchParams.get('qr');
               if (token) {
                 scannedQRToken = token;
-                setQRStatus('success', '✅ QR code detected! Tap the button below to log in.');
+                setQRStatus('success', 'QR code detected! Tap the button below to log in.');
                 document.getElementById('btn-qr-login').style.display = 'block';
               } else {
-                setQRStatus('error', '❌ This QR code is not an ImpulseCheck login QR.');
+                setQRStatus('error', 'This QR code is not an ImpulseCheck login QR.');
               }
             } catch {
-              setQRStatus('error', '❌ Could not read QR code data.');
+              setQRStatus('error', 'Could not read QR code data.');
             }
           } else {
-            setQRStatus('error', '❌ No QR code found in this image. Try a clearer photo.');
+            setQRStatus('error', 'No QR code found in this image. Try a clearer photo.');
           }
         };
         img.src = e.target.result;
@@ -309,7 +309,7 @@
 
     async function loginWithQR() {
       if (!scannedQRToken) return;
-      setQRStatus('loading', '⏳ Verifying QR code…');
+      setQRStatus('loading', 'Verifying QR code…');
       document.getElementById('btn-qr-login').disabled = true;
 
       try {
@@ -324,10 +324,10 @@
           document.getElementById('btn-qr-login').disabled = false;
           return;
         }
-        setQRStatus('success', '✅ Logged in! Redirecting…');
+        setQRStatus('success', 'Logged in! Redirecting…');
         setTimeout(() => loginSuccess(data.token, data.user), 800);
       } catch (err) {
-        setQRStatus('error', '❌ Cannot connect to server.');
+        setQRStatus('error', 'Cannot connect to server.');
         document.getElementById('btn-qr-login').disabled = false;
       }
     }
@@ -347,7 +347,7 @@
       if (deviceQRToken && !qrParam) {
         switchTab('qr');
         document.getElementById('qr-upload-zone').style.display = 'none';
-        setQRStatus('loading', '⚡ Logging in with your saved QR…');
+        setQRStatus('loading', 'Logging in with your saved QR…');
         document.getElementById('btn-qr-login').style.display = 'none';
         try {
           const res  = await fetch(`${window.IC_API_BASE || 'https://impulsecheck-backend.onrender.com/api'}/qrauth/verify`, {
@@ -359,16 +359,16 @@
           if (!res.ok) {
             // Token expired — clear it and let user log in normally
             localStorage.removeItem('ic_qr_token');
-            setQRStatus('error', '❌ Quick login expired. Please log in again.');
+            setQRStatus('error', 'Quick login expired. Please log in again.');
             document.getElementById('qr-upload-zone').style.display = 'block';
             return;
           }
-          setQRStatus('success', '✅ Logged in! Redirecting…');
+          setQRStatus('success', 'Logged in! Redirecting…');
           // Refresh stored token with new one if returned
           if (data.qrToken) localStorage.setItem('ic_qr_token', data.qrToken);
           setTimeout(() => loginSuccess(data.token, data.user), 600);
         } catch {
-          setQRStatus('error', '❌ Cannot connect to server.');
+          setQRStatus('error', 'Cannot connect to server.');
           document.getElementById('qr-upload-zone').style.display = 'block';
         }
         return;
@@ -378,7 +378,7 @@
       if (qrParam) {
         switchTab('qr');
         scannedQRToken = qrParam;
-        setQRStatus('success', '✅ QR code detected! Tap the button below to log in.');
+        setQRStatus('success', 'QR code detected! Tap the button below to log in.');
         document.getElementById('btn-qr-login').style.display = 'block';
         document.getElementById('qr-upload-zone').style.display = 'none';
       }

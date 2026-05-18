@@ -231,24 +231,23 @@
 
         <!-- Scanner autofill notice -->
         <div class="scan-prefill-notice" id="scan-prefill-notice" style="display:none;">
-          <span>📷</span>
           Product pre-filled from image scan — review and complete the form below.
         </div>
 
         <!-- ── INPUT METHOD TOGGLE ── -->
         <div class="input-method-row">
           <button class="method-btn active" id="btn-manual" onclick="switchMethod('manual')">
-            ✏️ Type Manually
+            Type Manually
           </button>
           <button class="method-btn" id="btn-scan" onclick="switchMethod('scan')">
-            📷 Scan Product Image
+            Scan Product Image
           </button>
         </div>
 
         <!-- ── SCANNER PANEL ── -->
         <div class="scanner-panel" id="scanner-panel">
           <div class="scanner-header">
-            <div class="scanner-header-icon">📷</div>
+            <div class="scanner-header-icon"></div>
             <div class="scanner-header-text">
               <h3>Product Scanner</h3>
               <p>Take a photo — Identifies the product and fills the form for you</p>
@@ -260,13 +259,13 @@
 
             <div class="upload-zone" id="upload-zone">
               <input type="file" id="scan-image-input" accept="image/*" capture="environment" onchange="handleScanImage(event)" />
-              <div class="upload-zone-icon">🖼️</div>
+              <div class="upload-zone-icon"></div>
               <p>Tap to upload or <strong>take a photo</strong></p>
               <p style="margin-top:4px;font-size:12px;">JPG, PNG, WEBP · max 5 MB</p>
             </div>
 
             <button class="scan-analyze-btn" id="scan-analyze-btn" onclick="runScan()">
-              ✨ Analyze Product
+              Analyze Product
             </button>
 
             <div class="scan-loader" id="scan-loader">
@@ -276,7 +275,7 @@
 
             <!-- Result strip shown after scan -->
             <div class="scan-result-strip" id="scan-result-strip">
-              <div class="srs-icon" id="srs-icon">🛍️</div>
+              <div class="srs-icon" id="srs-icon"></div>
               <div class="srs-info">
                 <div class="srs-name" id="srs-name">—</div>
                 <div class="srs-meta" id="srs-meta">—</div>
@@ -466,9 +465,7 @@
       // Show result strip
       const riskColors = { Low: '#2eaa7e', Moderate: '#f0a830', High: '#e53935', 'Very High': '#e53935' };
       const rc = riskColors[d.impulseRiskLabel] || '#888';
-      const catEmoji = { Electronics:'📱', Clothing:'👗', Food:'🍔', Beauty:'💄', Home:'🏠', Entertainment:'🎮', Sports:'⚽', Education:'📚', Other:'🛍️' };
-
-      document.getElementById('srs-icon').textContent  = catEmoji[d.category] || '🛍️';
+      document.getElementById('srs-icon').textContent  = '';
       document.getElementById('srs-name').textContent  = d.productName || 'Unknown product';
       document.getElementById('srs-meta').textContent  =
         (d.category || '') + ' · ' + (d.needVsWant || '') +
@@ -533,7 +530,7 @@
             .reduce((s, p) => s + parseFloat(p.price), 0);
           const remaining = budgetAmount - thisMonthSpent;
           if (remaining <= 0) {
-            banner.innerHTML = '⚠️ Your budget is fully used up! <a href="set-budget.html" style="color:#e53935;font-weight:700;">Set a new budget</a> before recording a purchase.';
+            banner.innerHTML = 'Your budget is fully used up! <a href="set-budget.html" style="color:#e53935;font-weight:700;">Set a new budget</a> before recording a purchase.';
             banner.style.display = 'block';
             banner.style.background = '#fce4e4';
             banner.style.color = '#e53935';

@@ -74,7 +74,7 @@
         localStorage.setItem('ic_user',     JSON.stringify(data.user));
         localStorage.setItem('ic_currency', data.user.currency || 'PHP');
 
-        sessionStorage.setItem('toast_msg', '✅ Signed in with Google!');
+        sessionStorage.setItem('toast_msg', 'Signed in with Google!');
         window.location.href = 'dashboard.html';
       } catch (err) {
         document.getElementById('cb-title').textContent = 'Sign-in failed';

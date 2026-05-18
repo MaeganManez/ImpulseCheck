@@ -110,10 +110,10 @@
 
     list.innerHTML = notifs.map(n => {
       const iconMap = {
-        welcome: '🎉', budget: '💰', avoid: '🚫',
-        wait: '⏳', buy: '✅', report: '📊', info: '💡',
+        welcome: '★', budget: '$', avoid: '×',
+        wait: '…', buy: '✓', report: '≡', info: 'i',
       };
-      const icon    = iconMap[n.type] || '💡';
+      const icon    = iconMap[n.type] || 'i';
       const typeClass = n.type === 'budget' ? 'warn' : n.type === 'avoid' ? 'avoid' : '';
       const timeAgo  = getTimeAgo(n.created_at);
 

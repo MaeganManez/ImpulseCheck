@@ -180,7 +180,7 @@
           <span class="row-name">${a.item_name || a.name}</span>
           <span class="row-price">${fmt(parseFloat(a.price))}</span>
           <span class="row-outcome">${tagHTML(a.user_decision || a.outcome)}</span>
-          <button class="delete-btn" onclick="deletePurchase(${a.id})" title="Delete">🗑</button>
+          <button class="delete-btn" onclick="deletePurchase(${a.id})" title="Delete">&times;</button>
         </div>`).join('');
       section.innerHTML = `
         <div class="act-header"><span>Recent Activity</span><span></span><span></span><span></span></div>

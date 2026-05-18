@@ -254,8 +254,8 @@
       <h3>Email Spending Report</h3>
       <p>Choose a period and we'll send a full summary to your registered email address.</p>
       <div style="display:flex;gap:10px;margin-bottom:22px;">
-        <button id="period-weekly"  class="period-btn"        onclick="selectPeriod('weekly')">📅 Weekly</button>
-        <button id="period-monthly" class="period-btn active" onclick="selectPeriod('monthly')">📆 Monthly</button>
+        <button id="period-weekly"  class="period-btn"        onclick="selectPeriod('weekly')">Weekly</button>
+        <button id="period-monthly" class="period-btn active" onclick="selectPeriod('monthly')">Monthly</button>
       </div>
       <div class="del-modal-btns">
         <button class="btn btn-outline" onclick="closeReportModal()">Cancel</button>
@@ -337,18 +337,18 @@
 
     function confirmDelete() {
       if (pendingClearAll) {
-        saveActivity([]); closeDel(); render(); showToast('🗑️ All transactions cleared.'); return;
+        saveActivity([]); closeDel(); render(); showToast('All transactions cleared.'); return;
       }
       const row = document.getElementById('row-' + pendingDeleteId);
       if (row) {
         row.classList.add('removing');
         row.addEventListener('animationend', () => {
           saveActivity(loadActivity().filter(a => a.id !== pendingDeleteId));
-          render(); showToast('🗑️ Transaction deleted.');
+          render(); showToast('Transaction deleted.');
         }, { once: true });
       } else {
         saveActivity(loadActivity().filter(a => a.id !== pendingDeleteId));
-        render(); showToast('🗑️ Transaction deleted.');
+        render(); showToast('Transaction deleted.');
       }
       closeDel();
     }
@@ -390,7 +390,7 @@
     }
     async function sendReport() {
       const token = localStorage.getItem('ic_token');
-      if (!token) { showToast('⚠️ Please log in first.'); closeReportModal(); return; }
+      if (!token) { showToast('Please log in first.'); closeReportModal(); return; }
       try {
         const res  = await fetch('https://impulsecheck-backend.onrender.com/api/report/send', {
           method: 'POST',
@@ -399,8 +399,8 @@
         });
         const data = await res.json();
         closeReportModal();
-        showToast(res.ok ? '✅ ' + data.message : '❌ ' + data.error);
-      } catch { closeReportModal(); showToast('❌ Cannot connect to server.'); }
+        showToast(res.ok ? data.message : data.error);
+      } catch { closeReportModal(); showToast('Cannot connect to server.'); }
     }
 
     render();

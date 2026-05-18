@@ -239,26 +239,26 @@
           <div class="currency-selected-badge" id="currency-badge">₱ PHP</div>
         </div>
         <select class="currency-select" id="pref-currency" onchange="updateCurrencyBadge()">
-          <option value="PHP" data-symbol="₱" selected>🇵🇭 Philippine Peso (₱ PHP)</option>
-          <option value="USD" data-symbol="$">🇺🇸 US Dollar ($ USD)</option>
-          <option value="EUR" data-symbol="€">🇪🇺 Euro (€ EUR)</option>
-          <option value="GBP" data-symbol="£">🇬🇧 British Pound (£ GBP)</option>
-          <option value="JPY" data-symbol="¥">🇯🇵 Japanese Yen (¥ JPY)</option>
-          <option value="KRW" data-symbol="₩">🇰🇷 Korean Won (₩ KRW)</option>
-          <option value="CNY" data-symbol="¥">🇨🇳 Chinese Yuan (¥ CNY)</option>
-          <option value="SGD" data-symbol="S$">🇸🇬 Singapore Dollar (S$ SGD)</option>
-          <option value="AUD" data-symbol="A$">🇦🇺 Australian Dollar (A$ AUD)</option>
-          <option value="CAD" data-symbol="C$">🇨🇦 Canadian Dollar (C$ CAD)</option>
-          <option value="INR" data-symbol="₹">🇮🇳 Indian Rupee (₹ INR)</option>
-          <option value="MYR" data-symbol="RM">🇲🇾 Malaysian Ringgit (RM MYR)</option>
-          <option value="IDR" data-symbol="Rp">🇮🇩 Indonesian Rupiah (Rp IDR)</option>
-          <option value="THB" data-symbol="฿">🇹🇭 Thai Baht (฿ THB)</option>
-          <option value="VND" data-symbol="₫">🇻🇳 Vietnamese Dong (₫ VND)</option>
-          <option value="AED" data-symbol="د.إ">🇦🇪 UAE Dirham (د.إ AED)</option>
-          <option value="SAR" data-symbol="﷼">🇸🇦 Saudi Riyal (﷼ SAR)</option>
-          <option value="BRL" data-symbol="R$">🇧🇷 Brazilian Real (R$ BRL)</option>
-          <option value="MXN" data-symbol="$">🇲🇽 Mexican Peso ($ MXN)</option>
-          <option value="ZAR" data-symbol="R">🇿🇦 South African Rand (R ZAR)</option>
+          <option value="PHP" data-symbol="₱" selected>Philippine Peso (₱ PHP)</option>
+          <option value="USD" data-symbol="$">US Dollar ($ USD)</option>
+          <option value="EUR" data-symbol="€">Euro (€ EUR)</option>
+          <option value="GBP" data-symbol="£">British Pound (£ GBP)</option>
+          <option value="JPY" data-symbol="¥">Japanese Yen (¥ JPY)</option>
+          <option value="KRW" data-symbol="₩">Korean Won (₩ KRW)</option>
+          <option value="CNY" data-symbol="¥">Chinese Yuan (¥ CNY)</option>
+          <option value="SGD" data-symbol="S$">Singapore Dollar (S$ SGD)</option>
+          <option value="AUD" data-symbol="A$">Australian Dollar (A$ AUD)</option>
+          <option value="CAD" data-symbol="C$">Canadian Dollar (C$ CAD)</option>
+          <option value="INR" data-symbol="₹">Indian Rupee (₹ INR)</option>
+          <option value="MYR" data-symbol="RM">Malaysian Ringgit (RM MYR)</option>
+          <option value="IDR" data-symbol="Rp">Indonesian Rupiah (Rp IDR)</option>
+          <option value="THB" data-symbol="฿">Thai Baht (฿ THB)</option>
+          <option value="VND" data-symbol="₫">Vietnamese Dong (₫ VND)</option>
+          <option value="AED" data-symbol="د.إ">UAE Dirham (د.إ AED)</option>
+          <option value="SAR" data-symbol="﷼">Saudi Riyal (﷼ SAR)</option>
+          <option value="BRL" data-symbol="R$">Brazilian Real (R$ BRL)</option>
+          <option value="MXN" data-symbol="$">Mexican Peso ($ MXN)</option>
+          <option value="ZAR" data-symbol="R">South African Rand (R ZAR)</option>
         </select>
       </div>
 
@@ -429,7 +429,7 @@
         updateDeviceQRStatus();
 
       } catch (err) {
-        document.getElementById('qr-loading').innerHTML = '❌ Failed to load QR. <button onclick="loadQR()" style="color:var(--green);background:none;border:none;cursor:pointer;font-weight:700;">Retry</button>';
+        document.getElementById('qr-loading').innerHTML = 'Failed to load QR. <button onclick="loadQR()" style="color:var(--green);background:none;border:none;cursor:pointer;font-weight:700;">Retry</button>';
       }
     }
 
@@ -438,9 +438,9 @@
       const btn   = document.getElementById('btn-qr-enable');
       const status = document.getElementById('qr-device-status');
       if (saved) {
-        btn.textContent = '✅ Quick Login Active — Disable';
+        btn.textContent = 'Quick Login Active — Disable';
         btn.style.background = '#e53935';
-        status.textContent = '⚡ This device can log in instantly with QR.';
+        status.textContent = 'This device can log in instantly with QR.';
       } else {
         btn.textContent = 'Enable Quick Login on This Device';
         btn.style.background = '';
