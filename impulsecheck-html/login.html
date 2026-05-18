@@ -338,10 +338,43 @@
       el.textContent = msg;
     }
 
-    // Auto-detect if arriving from a QR scan (URL has ?qr=...)
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       const params = new URLSearchParams(window.location.search);
       const qrParam = params.get('qr');
+
+      // Auto-login from saved device QR token
+      const deviceQRToken = localStorage.getItem('ic_qr_token');
+      if (deviceQRToken && !qrParam) {
+        switchTab('qr');
+        document.getElementById('qr-upload-zone').style.display = 'none';
+        setQRStatus('loading', '⚡ Logging in with your saved QR…');
+        document.getElementById('btn-qr-login').style.display = 'none';
+        try {
+          const res  = await fetch(`${window.IC_API_BASE || 'https://impulsecheck-backend.onrender.com/api'}/qrauth/verify`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ qrToken: deviceQRToken }),
+          });
+          const data = await res.json();
+          if (!res.ok) {
+            // Token expired — clear it and let user log in normally
+            localStorage.removeItem('ic_qr_token');
+            setQRStatus('error', '❌ Quick login expired. Please log in again.');
+            document.getElementById('qr-upload-zone').style.display = 'block';
+            return;
+          }
+          setQRStatus('success', '✅ Logged in! Redirecting…');
+          // Refresh stored token with new one if returned
+          if (data.qrToken) localStorage.setItem('ic_qr_token', data.qrToken);
+          setTimeout(() => loginSuccess(data.token, data.user), 600);
+        } catch {
+          setQRStatus('error', '❌ Cannot connect to server.');
+          document.getElementById('qr-upload-zone').style.display = 'block';
+        }
+        return;
+      }
+
+      // Manual QR scan from URL param
       if (qrParam) {
         switchTab('qr');
         scannedQRToken = qrParam;
