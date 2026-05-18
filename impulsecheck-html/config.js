@@ -2,5 +2,5 @@
 window.IC_API_BASE = 'https://impulsecheck-backend.onrender.com/api';
 
 // Supabase public config — safe to expose in frontend (anon key only)
-window.IC_SUPABASE_URL      = 'your_supabase_project_url_here';
-window.IC_SUPABASE_ANON_KEY = 'your_supabase_anon_key_here';
+window.IC_SUPABASE_URL      = 'https://rezpykifqjveynycsrps.supabase.co';
+window.IC_SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJlenB5a2lmcWp2ZXlueWNzcnBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxNzAyODMsImV4cCI6MjA5Mzc0NjI4M30.8LSS9f_kb3PUqOf7Th0Of57hx9TV6hTO0LreplgtiTQ';
