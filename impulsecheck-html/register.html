@@ -341,7 +341,7 @@
       btn.textContent = 'Redirecting…';
       await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
-        options: { redirectTo: window.location.origin + '/oauth-callback.html' },
+        options: { redirectTo: window.IC_SUPABASE_REDIRECT_URL },
       });
     }
 
